@@ -219,6 +219,8 @@ Delivery instruction: Please proceed to <geo_coordinates>. Identify the seeker u
 | **G — Fulfilment bids** | Prep capacity commits; self-pickup vs delivery choice | integration-service, web (fulfiller UI) |
 | **H — Transport bids** | Route/capacity bids; geo match vendor → beneficiaries | integration-service, web |
 | **I — Allocation** | Window aggregation; payer notify; fulfiller → transporter pay instructions | integration-service, notification-service |
+| **J — Recurring orders** | Subscription plans + occurrence materializer into `order_intents`; plan dashboards | integration-service, mobile, web |
+| **K — Recipe BOM + producer supply** | Chef/mentor recipes (UOM, versioned); BOM explosion per window/locality; producer commitments (no buyer lists) | integration-service, web (producer + chef UI) |
 
 **Progress map (all workstreams):** § **Where we are** in [STATUS.md](./STATUS.md).
 

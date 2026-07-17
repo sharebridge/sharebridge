@@ -97,5 +97,8 @@ After shipping, update [STATUS.md](./STATUS.md) workstream table.
 - `feat` (mobile): handover map picker + `GET /v1/geocode/reverse`; `HANDOVER_MAP_ENABLED` from `local.properties`.
 - `feat` (web): Initiations / Actions mobile layout fixes.
 - `docs`: location vendor ADR; unified reading sequence steps 10–13.
+- `fix` (mobile): Android build toolchain — AGP 8.11.1, Gradle 8.14, Kotlin 2.3.20, `compilerOptions` DSL.
+- `ops`: custom domain `sharingbridge.org` + `www` live (GoDaddy DNS → Render); Google origins + comma-separated `WEB_CORS_ORIGINS` on both backends.
+- `docs`: Future_Extensions Phase C (recurring orders) + Phase D summary; PRODUCT_MODEL § Producer supply & recipe BOM; ENGINEERING_PLAN phases J–K.
 
 Older history: git log on `sharingbridge` and service repos.

@@ -651,6 +651,10 @@ flutter build apk --release `
 
 (Omit `HANDOVER_MAP_ENABLED=true` only if you rely on Gradle auto-inject when the key is in `local.properties`; explicit `true` is recommended.)
 
+Production `WEB_DASHBOARD_URL` is `https://sharingbridge.org` (custom domain) — rebuild the APK after any URL change.
+
+**Build fails with `requires Android Gradle plugin 8.9.1 or higher`:** the repo pins **AGP 8.11.1 / Gradle 8.14 / Kotlin 2.3.20** — `git pull` in `sharingbridge-mobile-app` and rebuild (do not downgrade `androidx` deps).
+
 **Verify:**
 
 1. APK exists at `build\app\outputs\flutter-apk\app-release.apk`.
@@ -968,7 +972,8 @@ Setup gaps: [database-setup-sequence.md](../configuration/database-setup-sequenc
 - **“Network unavailable”** on a **physical phone** with correct `192.168.x.x` dart-defines: phone and PC are on **different networks** (mobile data, other broadband, guest Wi‑Fi) — join the **same Wi‑Fi as the PC**, verify `http://<PC-LAN-IP>:8080/health` in the phone browser, or use **USB + `adb reverse`** (**§3-host**).
 - `401 invalid_google_token`: `VITE_GOOGLE_CLIENT_ID` must match `GOOGLE_CLIENT_ID_WEB`; add `http://localhost:5173` under Google **Authorized JavaScript origins**.
 - CORS errors (local): `WEB_CORS_ORIGINS=http://localhost:5173` on **both** Node services in **local** `.env`.
-- CORS errors (hosted dashboard): set `WEB_CORS_ORIGINS=https://<static-site>.onrender.com` on **both** services in the **Render** dashboard — [backend-render.md](../configuration/backend-render.md).
+- CORS errors (hosted dashboard): set `WEB_CORS_ORIGINS` on **both** services in the **Render** dashboard, **comma-separated** — include `https://<static-site>.onrender.com` and, in production, `https://sharingbridge.org,https://www.sharingbridge.org` — [backend-render.md](../configuration/backend-render.md).
+- `Error 400: origin_mismatch` on Google sign-in: the exact browser origin (apex **and** `www.` are separate) must be in **Authorized JavaScript origins** — [web-client.md § Custom domain](../configuration/web-client.md#custom-domain-production-sharingbridgeorg).
 
 See [configuration/google-auth-setup.md](../configuration/google-auth-setup.md) troubleshooting.
 

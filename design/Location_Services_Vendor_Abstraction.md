@@ -93,7 +93,7 @@ Nominatim request/response parsing lives in `postalGeocode.js` only. A second ve
 | Key | Where | v1 behaviour | Future |
 |-----|-------|--------------|--------|
 | `GOOGLE_MAPS_API_KEY` | `android/local.properties` only | Native Maps SDK (manifest); Gradle auto-sets `HANDOVER_MAP_ENABLED=true` when non-empty |
-| `HANDOVER_MAP_ENABLED` | `true` / `false` via `--dart-define` (optional) | Compile-time map picker vs form; **auto `true`** when `GOOGLE_MAPS_API_KEY` is in `local.properties` |
+| `HANDOVER_MAP_ENABLED` | `true` / `false` via `--dart-define` (pass `true` for map builds) | Compile-time map picker vs form; Gradle may auto-add `true` when `GOOGLE_MAPS_API_KEY` is in `local.properties` and the define is omitted — explicit `true` recommended |
 | `MAP_TILE_PROVIDER` | *(reserved)* | **Not implemented** — implicit `google` when `GOOGLE_MAPS_API_KEY` is set | `google` \| `osm` \| `mapbox` |
 | `NOMINATIM_USER_AGENT` | integration-service `.env` | Required OSM identification string | Unchanged when Nominatim stays default |
 | `GEOCODER_PROVIDER` | integration-service `.env` | **Not implemented** — implicit `nominatim` | `nominatim` \| `google` \| regional adapters |

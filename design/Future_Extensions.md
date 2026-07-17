@@ -1,6 +1,6 @@
-# SharingBridge — Future extensions (order operations only)
+# SharingBridge — Future extensions (order operations)
 
-**Purpose:** Technical supplement for **order operations** — payer marks payment done (Phase A), delivery proof (Phase B). **Not** the marketplace roadmap.
+**Purpose:** Technical supplement for **order operations** — payer marks payment done (Phase A), delivery proof (Phase B), recurring orders (Phase C), and recipe-BOM ingredient demand for producers (Phase D summary — vocabulary lives in PRODUCT_MODEL). **Not** the full marketplace roadmap.
 
 **Read first:** [README.md § Documentation guide](../README.md#documentation-guide) — doc hierarchy and reading order.
 
@@ -8,7 +8,8 @@
 |-------|-------------------|
 | Glossary, actors, marketplace, dashboard UX | [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) |
 | Configurator, payer, unified initiation | [Configurator_Role_and_Unified_Initiation.md](./Configurator_Role_and_Unified_Initiation.md) |
-| Engineering phases E–I, repos, AI timeline | [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) § Marketplace phases |
+| Engineering phases E–K, repos, AI timeline | [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) § Marketplace phases |
+| Producer supply, recipe BOM, UOM vocabulary | [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) § Producer supply & recipe BOM |
 | SQL run order | [database-setup-sequence.md](../configuration/database-setup-sequence.md) |
 
 **Related:** [SharingBridge_End_to_End_Workflow.md](./SharingBridge_End_to_End_Workflow.md) · [database.md](../configuration/database.md) · [authentication.md](../configuration/authentication.md)
@@ -24,9 +25,10 @@
 | Initiator lists **own** initiations (mobile); coordinator lists **all** (web) | Shipped |
 | Geo on order intent (`location_lat/lng`, `locality_key`); initiator neighbourhood feed; PostGIS `ST_DWithin` list queries | Shipped — [database.md](../configuration/database.md) |
 | Mobile handover map picker + server reverse geocode | Shipped — [Handover_Location_Map_Picker.md](./Handover_Location_Map_Picker.md); vendor strategy [Location_Services_Vendor_Abstraction.md](./Location_Services_Vendor_Abstraction.md) |
-| Payment / delivery lifecycle, coordinator **map** UI (bbox / clustering) | **Not shipped** |
-| Delivery photo proof, delivery-partner role | **Planned** |
-| Locality demand + eco kitchen commitments | [Eco_Kitchen_Initiation_Flow.md](./Eco_Kitchen_Initiation_Flow.md); engineering phases E–I in [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) |
+| **Mark payment done** (web `PATCH /v1/order-intents/:id`, `payment_status` → `paid_externally`); coordinator may set `delivery_status` / `delivery_photo_url` | Shipped |
+| Coordinator web **Map** tab (`VITE_GOOGLE_MAPS_API_KEY`) | Shipped — bbox/clustering refinements open |
+| Delivery photo **capture flow**, delivery-partner role | **Planned** (Phase B — PATCH fields exist, no partner UX) |
+| Locality demand + eco kitchen commitments | [Eco_Kitchen_Initiation_Flow.md](./Eco_Kitchen_Initiation_Flow.md); engineering phases E–K in [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) |
 
 Payments for food still happen in **vendor apps** (Swiggy, Zomato, etc.). SharingBridge tracks **intent and status**, not card charges, unless a later scope explicitly adds audited payment references.
 
@@ -45,7 +47,7 @@ Payments for food still happen in **vendor apps** (Swiggy, Zomato, etc.). Sharin
 
 **Goal:** Turn **order initiation** into a trackable **order** for coordinators and initiators/payers, without vendor API integration.
 
-### A.1 Payer marks payment done
+### A.1 Payer marks payment done — **shipped (web)**
 
 After the **payer** places and pays in the **vendor app**, they open **order history** (mobile; web limited dashboard), select the record, and set:
 
@@ -98,7 +100,7 @@ JWT: keep active `role` per session; add `roles[]` and optional **`admin`** in `
 
 **Shipped:** `order_intents.location` + `listForDashboard` SQL (`ST_DWithin`, `locality_key`). Run [schema-postgis-migration.sql](../configuration/schema-postgis-migration.sql) on older DBs; `npm run db:backfill-order-intent-geo` in integration-service.
 
-**Next:** Coordinator web map (pins, bbox pan) using the same `near_lat` / `near_lng` / `since` params; optional `ST_MakeEnvelope` for viewport queries.
+**Shipped:** Coordinator web **Map** tab (pins for intents + seeker demands; `VITE_GOOGLE_MAPS_API_KEY`). **Next:** bbox pan / viewport queries (`ST_MakeEnvelope`), clustering.
 
 ---
 
@@ -143,14 +145,67 @@ sequenceDiagram
 
 ---
 
+## Phase C — Recurring orders (subscriptions)
+
+**Goal:** Let an initiator/payer book **repeat orders for a period** (e.g. lunch every weekday for a month for a parent) instead of registering each intent by hand. Recurring plans are also the main input to demand aggregation (Phase D).
+
+### C.1 Plan model (additive)
+
+New table `recurring_orders` (occurrences reuse `order_intents` — no parallel order pipeline):
+
+| Field | Notes |
+|-------|-------|
+| `initiator_user_id` | Signed-in demand initiator (beneficiary has no login) |
+| `beneficiary_ref` | Same beneficiary context as one-off intents (address, notes, consent) |
+| `standard_item_id` + `portions` | Standard menu item and quantity per occurrence |
+| `cadence` | Simple recurrence: `daily` \| `weekdays` \| `weekly` + day list (no full RRULE in v1) |
+| `starts_on` / `ends_on` | Bounded period; renewal is an explicit action |
+| `status` | `active` → `paused` → `ended` (payer-controlled) |
+
+A scheduler (integration-service job) materializes the next occurrence into `order_intents` per window, tagged with `recurring_order_id`, so existing dashboards, connection, and delivery flows work unchanged.
+
+### C.2 Dashboards
+
+| Viewer | Sees |
+|--------|------|
+| **Initiator / payer** | Plan card: cadence, next occurrence, fulfilled vs upcoming count, pause/end |
+| **Coordinator** | Aggregated recurring demand per window / `locality_key` alongside one-off intents |
+| **Eco kitchen / fulfiller** | Committed portions per window including recurring volume (predictable base load) |
+
+### C.3 API sketch (illustrative)
+
+- `POST /v1/recurring-orders` — create plan (initiator JWT).
+- `GET /v1/recurring-orders?mine=1` — plans + next occurrence.
+- `PATCH /v1/recurring-orders/:id` — pause / resume / end.
+- Occurrence rows appear in existing `GET /v1/donor-seeker/order-intents` responses with `recurring_order_id`.
+
+**Payment stays off-platform** per BRD — a recurring plan is a demand commitment, not a stored payment method.
+
+**Feasibility:** High for the plan CRUD + materializer; the main new piece is the scheduled job.
+
+---
+
+## Phase D — Recipe BOM & producer supply (summary)
+
+**Differentiator:** an **economical avenue** connecting **organic producers** to buyers. Producers **never see a raw buyer list** — the platform converts aggregated meal demand into **ingredient demand** via recipe explosion, enabling production at scale and **JIT supply**.
+
+Pipeline: recurring plans (Phase C) + one-off intents per window/locality → **standard items** → **recipe (BOM)** explosion → ingredient quantities (**UOM**) → producer commitments.
+
+- **Recipes are authored by chefs/mentors** who introduce standard items: versioned ingredient lists with quantity-per-portion and UOM (kg, L, count).
+- Producers see only **ingredient × quantity × window × locality**, and commit supply against it.
+
+**Authoritative spec:** vocabulary and model in [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) § Producer supply & recipe BOM; engineering phases **J–K** in [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) § Marketplace phases. Do not extend BOM details here.
+
+---
+
 ## Marketplace (moved — do not extend this file)
 
 Eco kitchen pledging, kitchen commitments, allocation, and configurator model:
 
 - [Eco_Kitchen_Initiation_Flow.md](./Eco_Kitchen_Initiation_Flow.md) — **authoritative** initiation routes and connection
-- [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) — glossary, actors
+- [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) — glossary, actors, **producer supply & recipe BOM**
 - [Configurator_Role_and_Unified_Initiation.md](./Configurator_Role_and_Unified_Initiation.md) — configurator vs automation
-- [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) — marketplace phases **E–I**
+- [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) — marketplace phases **E–K**
 - [database-setup-sequence.md](../configuration/database-setup-sequence.md) — SQL for marketplace tables
 
 ---
@@ -162,7 +217,9 @@ Eco kitchen pledging, kitchen commitments, allocation, and configurator model:
 | **Today** | Register initiation, own list | Web list (coordinator role) | External app only | External |
 | **A** | Mark payment done on record | Filters, neighbourhood columns | — | Status fields only |
 | **B** | See delivery proof | Monitor | — | Photo + complete |
-| **Marketplace** | See PRODUCT_MODEL | Configurator (setup only) | Self-service bids | See ENGINEERING_PLAN E–I |
+| **C** | Book / pause recurring plan | Aggregated recurring demand per window | Predictable base load per window | Reuses A–B per occurrence |
+| **D** | — (demand input only) | Ingredient demand per window/locality | Producers commit supply (no buyer list) | — |
+| **Marketplace** | See PRODUCT_MODEL | Configurator (setup only) | Self-service bids | See ENGINEERING_PLAN E–K |
 
 ---
 
@@ -175,4 +232,4 @@ When Phase A ships, update:
 - [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) new flows.
 - [AGENT_SESSION.md](../development/AGENT_SESSION.md) “Next Recommended Tasks”.
 
-**Last updated:** 2026-06 — marketplace content removed (see README § Documentation guide).
+**Last updated:** 2026-07 — added Phase C (recurring orders) and Phase D summary (recipe BOM / producer supply; spec in PRODUCT_MODEL).

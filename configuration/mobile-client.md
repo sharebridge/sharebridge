@@ -156,6 +156,8 @@ flutter build apk --release `
 
 Add `--dart-define=HANDOVER_MAP_ENABLED=true` when shipping the map picker (with `GOOGLE_MAPS_API_KEY` in `local.properties`). See [§ Handover map](#handover-map-picker--two-settings-not-one).
 
+**Custom domain:** production web runs at `https://sharingbridge.org` — use it as `WEB_DASHBOARD_URL`. Defines are baked at compile time, so **rebuild the APK** after a domain (or any URL) change; already-installed APKs keep the old URL.
+
 **Output:** `build\app\outputs\flutter-apk\app-release.apk`
 
 **Install on a connected phone** (USB debugging on):

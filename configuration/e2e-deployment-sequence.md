@@ -250,7 +250,7 @@ Set **Render production** column in [environment-variables.md](./environment-var
 
 **integration-service (required on latest code):** `GIS_SCHEMA=extensions` (must match Supabase spatial bootstrap); `NOMINATIM_USER_AGENT` for reverse geocode (`/v1/geocode/reverse`, menu `locality_key`). Without `GIS_SCHEMA`, the service **will not start**.
 
-**Mobile map picker (optional):** `GOOGLE_MAPS_API_KEY` in `android/local.properties` only — Gradle sets `HANDOVER_MAP_ENABLED=true`. Not a Render env var. See [mobile-client.md § Handover](./mobile-client.md#handover-location--map-picker-address-pickup-note).
+**Mobile map picker (optional):** `GOOGLE_MAPS_API_KEY` in `android/local.properties` (tiles) **and** `--dart-define=HANDOVER_MAP_ENABLED=true` on the build line (map UI). Not a Render env var. See [mobile-client.md § Handover map](./mobile-client.md#handover-map-picker--two-settings-not-one).
 
 **This phase only:** `WEB_CORS_ORIGINS` may stay `http://localhost:5173` until Phase 4 if you test local Vite against hosted APIs; otherwise set the static site origin in Phase 4. Use Google Sign-In only on Render production (no dev JWT mint over HTTP).
 
@@ -307,20 +307,32 @@ WEB_CORS_ORIGINS=http://localhost:5173,https://<your-static-site>.onrender.com
 
 Redeploy **user-service** and **integration-service** after saving. Local `.env` files are **not** read on Render.
 
+**Separator is a comma** — semicolons are silently treated as part of one origin and every request fails CORS ("Failed to fetch").
+
+**Custom domain (production):** with `sharingbridge.org` / `www.sharingbridge.org` on the static site, include **all** browser origins:
+
+```env
+WEB_CORS_ORIGINS=https://sharingbridge.org,https://www.sharingbridge.org,https://<your-static-site>.onrender.com
+```
+
+DNS + Render custom-domain steps: [web-client.md § Custom domain](./web-client.md#custom-domain-production-sharingbridgeorg).
+
 See [backend-render.md](./backend-render.md) § `WEB_CORS_ORIGINS`.
 
 ### 4.1 Google Console
 
 [Credentials](https://console.cloud.google.com/apis/credentials) → your **Web application** client → **Edit**.
 
-**Authorized JavaScript origins** — add **both** (no trailing slash):
+**Authorized JavaScript origins** — add **every** origin users can open (no trailing slash):
 
 ```text
 http://localhost:5173
 https://<your-static-site>.onrender.com
+https://sharingbridge.org
+https://www.sharingbridge.org
 ```
 
-Same Web Client ID for local and Render.
+Apex and `www` are **separate origins** to Google — omitting either causes `Error 400: origin_mismatch` on that host. Same Web Client ID for local and Render.
 
 ### 4.2 Static site rebuild (only if `VITE_*` changed)
 

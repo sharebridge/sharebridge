@@ -8,10 +8,10 @@
 |-----------|-----|
 | [STATUS.md](./STATUS.md) | **Progress vs plan** — update when milestones ship |
 | [AGENT_SESSION.md](./AGENT_SESSION.md) | Agent session: next tasks, runbook |
-| [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) | Engineering plan (phases **E–I**) |
+| [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) | Engineering plan (phases **E–K**) |
 | [Configurator_Role_and_Unified_Initiation.md](../design/Configurator_Role_and_Unified_Initiation.md) | Configurator vs daily ops |
 | [Eco_Kitchen_Initiation_Flow.md](../design/Eco_Kitchen_Initiation_Flow.md) | Three routes, connection, payment boundaries |
-| [Future_Extensions.md](../design/Future_Extensions.md) | Order-ops supplement only (payment-done, delivery proof) |
+| [Future_Extensions.md](../design/Future_Extensions.md) | Order-ops supplement (payment-done, delivery proof, recurring orders) |
 
 **Do not** spin up parallel product-model docs — extend **this file** for vocabulary and actors.
 
@@ -87,6 +87,12 @@ Never use **payee** for the mobile app user, JWT role, or initiator/payer.
 | **Prepaid order intent** | Planned unified record: standard menu + location + payer commitment; merges **Help a seeker** and **seeker demand** paths. Fulfillment: **bidder board** or **direct vendor** per initiation. |
 | **Demand fulfiller** | Signed-in kitchen/vendor who **commits prep capacity** (portions per window). Future role. |
 | **Transport bidder** | Signed-in courier who **commits delivery capacity** between prep points and beneficiary locations. Paid by **meal vendor**, not the payer. Future role. |
+| **Recurring order (subscription)** | Payer-booked repeat plan (standard item, portions, cadence, period). Occurrences materialize as normal `order_intents`. Future — [Future_Extensions.md](../design/Future_Extensions.md) Phase C. |
+| **Chef / mentor** | Author of **standard items** and their **recipes**. Curates menu quality; not a daily-ops role. Future role. |
+| **Recipe (BOM)** | Versioned bill of materials for one standard item: ingredient, **quantity per portion**, UOM, prep yield. Authored by chef/mentor. |
+| **UOM** | Unit of measure for an ingredient quantity — kg, g, L, mL, count. Recipes and producer commitments share the same UOM per ingredient. |
+| **BOM explosion** | Server-side conversion of aggregated portions per window/locality into **ingredient quantities** via recipes. Producers see only the exploded ingredient demand — never buyer lists. |
+| **Producer** | Supplier (e.g. **organic grower**) who commits ingredient supply against exploded demand per window/locality. Paid by kitchens/fulfillers off-platform. Future role. |
 
 ### App actors (who signs in)
 
@@ -155,7 +161,32 @@ If not self-pickup, the **meal vendor owns delivery** — own fleet **or** selec
 3. For non–self-pickup rows: require fulfiller delivery capacity **or** matched **transport bid** (vendor lat → beneficiary cluster).
 4. Self-pickup rows skip transport; vendor runs pickup proof workflow.
 
-**Implementation phases:** see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § Marketplace phases. Order-ops detail (payment-done, delivery photo): [Future_Extensions.md](../design/Future_Extensions.md) Phase A–B (legacy pointer).
+### Producer supply & recipe BOM (future, authoritative)
+
+**Differentiator:** SharingBridge as an **economical avenue** for consumers and vendors — connect **organic producers** to buyers, cut cost through **production at scale**, and enable **JIT supply** by showing producers near-term demand instead of stock guesses.
+
+**Privacy rule:** producers **never see buyer lists or beneficiary data**. Demand reaches them only as exploded ingredient quantities.
+
+```text
+Recurring plans + one-off intents (per window / locality_key)
+        ↓  aggregate portions per standard item
+Standard items  ──  recipe (BOM) per item, authored by chef/mentor
+        ↓  BOM explosion (qty per portion × portions, per UOM)
+Ingredient demand (ingredient × qty × window × locality)
+        ↓
+Producer commitments (JIT supply)  →  kitchens/fulfillers pay producers off-platform
+```
+
+| Rule | Detail |
+|------|--------|
+| Recipe authorship | **Chefs/mentors** who introduce a standard item provide its recipe: ingredient, qty per portion, UOM, yield. Versioned — demand explosion always uses the version active for the window. |
+| UOM discipline | One UOM per ingredient across recipes and commitments (kg, g, L, mL, count); no unit conversion at commit time. |
+| Aggregation window | Same window/locality buckets as fulfilment matching; recurring plans give the predictable base load. |
+| Payment | Kitchens/fulfillers pay producers **off-platform** — same no-wallet principle as all other legs. |
+
+Recurring order mechanics: [Future_Extensions.md](../design/Future_Extensions.md) Phase C. Engineering phases **J–K**: [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § Marketplace phases.
+
+**Implementation phases:** see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § Marketplace phases. Order-ops detail (payment-done, delivery photo, recurring orders): [Future_Extensions.md](../design/Future_Extensions.md) Phase A–C.
 
 ---
 

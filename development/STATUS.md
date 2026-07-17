@@ -6,12 +6,12 @@
 
 | Also read | For |
 |-----------|-----|
-| [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) | Long-term plan, phases E–I, free-tier stack |
+| [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) | Long-term plan, phases E–K, free-tier stack |
 | [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) | Glossary, actors, initiation routes |
 | [AGENT_SESSION.md](./AGENT_SESSION.md) | Agent session: next tasks, runbook, recent commits |
 | [database-setup-sequence.md](../configuration/database-setup-sequence.md) | SQL **1 → M1–M5** and **Where you are** on each environment |
 
-**Last updated:** June 2026
+**Last updated:** July 2026
 
 ---
 
@@ -24,7 +24,7 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
         ↓                              ↓
    Payment off-platform         Connection (order code) + notify
         ↓                              ↓
-   Delivery proof (Phase B)      Marketplace F–I (future)
+   Delivery proof (Phase B)      Marketplace F–K (future)
 ```
 
 ---
@@ -40,7 +40,8 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 | **Connection notify** | Eco Kitchen phase 4 + M5 | **Code shipped** | FCM + notification-service; wire per env |
 | **Handover map + geocode** | [Handover_Location_Map_Picker.md](../design/Handover_Location_Map_Picker.md) | **Shipped** | Map picker + `/v1/geocode/reverse`; redeploy integration-service on hosted envs |
 | **Web mobile UX (Initiations / Actions)** | web-app | **Shipped** | Coordinator dashboard layout fixes on narrow viewports |
-| **Marketplace F–I** | IMPLEMENTATION § F–I | **Not started** | Beneficiary profile, transport, allocation |
+| **Custom domain (production web)** | [web-client.md § Custom domain](../configuration/web-client.md#custom-domain-production-sharingbridgeorg) | **Shipped** | `sharingbridge.org` + `www` on Render static site; Google origins + `WEB_CORS_ORIGINS` updated; APK rebuild with new `WEB_DASHBOARD_URL` pending |
+| **Marketplace F–K** | IMPLEMENTATION § F–K | **Not started** | Beneficiary profile, transport, allocation, recurring orders, recipe BOM / producer supply |
 | **AI bridge** | AI_PLAN | **Shipped** | integration → ai-orchestration; flags on by default in `env.example` |
 | **AI live models** | AI_PLAN | **Shipped** | `AI_LLM_MODE=live` + Groq/Gemini keys — [ai-setup-handhold.md](../configuration/ai-setup-handhold.md) |
 | **AI delivery match** | IMPLEMENTATION phase D | **Not started** | No face embeddings / delivery verification |
@@ -110,6 +111,7 @@ Detail: [database-setup-sequence.md](../configuration/database-setup-sequence.md
 6. **UX redesign** — web hash routes shipped; mobile step wizards remain.
 7. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
 8. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
+9. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
 
 Session backlog and commit log: [AGENT_SESSION.md](./AGENT_SESSION.md).
 

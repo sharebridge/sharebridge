@@ -56,7 +56,7 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | `AUTH_TOKEN_ISSUER` | same | `sharingbridge-user-service` |
 | `AUTH_TOKEN_SECRET` | same | HS256 JWT signing — **same value** on all three |
 | `DATABASE_URL` | same | Postgres (Supabase in prod) |
-| `WEB_CORS_ORIGINS` | user-service, integration-service | Browser origin(s) of the dashboard, e.g. `http://localhost:5173` — **not** the API URL |
+| `WEB_CORS_ORIGINS` | user-service, integration-service | Browser origin(s) of the dashboard, **comma-separated** (never semicolons), e.g. `http://localhost:5173` — **not** the API URL. Production includes custom domains: `https://sharingbridge.org,https://www.sharingbridge.org,https://<static-site>.onrender.com` |
 
 ---
 
@@ -205,7 +205,7 @@ No `.env` file — pass at **`flutter run`** / **`flutter build apk --release`**
 | `PHOTO_SERVICE_BASE_URL` | `http://10.0.2.2:8092` or `http://<PC-LAN-IP>:8092` | `https://<photo-host>.onrender.com` |
 | `USER_ID` | dev only — pairs with `AUTH_TOKEN` | omit |
 | `USER_SERVICE_BASE_URL` | `http://10.0.2.2:8081` or `http://<PC-LAN-IP>:8081` | `https://<user-host>.onrender.com` |
-| `WEB_DASHBOARD_URL` | `http://10.0.2.2:5173` (emulator) or `http://<PC-LAN-IP>:5173` (phone) | `https://<static-site>.onrender.com` — **required** for home-screen **Neighbourhood dashboard (web)** link |
+| `WEB_DASHBOARD_URL` | `http://10.0.2.2:5173` (emulator) or `http://<PC-LAN-IP>:5173` (phone) | `https://sharingbridge.org` (custom domain) or `https://<static-site>.onrender.com` — **required** for home-screen **Neighbourhood dashboard (web)** link |
 
 `WEB_DASHBOARD_URL` is the deployed **sharingbridge-web-app** origin (same URL you open in the browser for the coordinator/initiator dashboard). Without it, the home tile is visible but disabled. See [mobile-client.md](./mobile-client.md).
 

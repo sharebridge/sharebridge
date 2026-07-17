@@ -93,6 +93,7 @@ CORS is enforced on **user-service** and **integration-service** (not on the sta
 | **Local** `.env` in user-service **and** integration-service | `npm run dev` at http://localhost:5173 | `http://localhost:5173` |
 | **Render** dashboard for **both** Node services | After static site is deployed | `https://<your-static-site>.onrender.com` |
 | **Render** (optional) | You still use local Vite but APIs stay on Render | `http://localhost:5173,https://<your-static-site>.onrender.com` |
+| **Render** (custom domain live) | Users open `https://sharingbridge.org` / `www.` | `https://sharingbridge.org,https://www.sharingbridge.org,https://<your-static-site>.onrender.com` |
 
 Rules:
 
@@ -102,7 +103,7 @@ Rules:
 4. **Do** add the Render static URL on **Render** user-service and integration-service when users open the **hosted** dashboard (Phase 4 in [e2e-deployment-sequence.md](./e2e-deployment-sequence.md)).
 5. Also add the static URL in **Google Console** → Web client → **Authorized JavaScript origins** (separate from CORS).
 
-Comma-separated, no trailing slashes, no paths. Redeploy both Node services after changing CORS on Render.
+**Comma-separated** (a semicolon separator is read as part of a single bogus origin — every browser call then fails with "Failed to fetch"), no trailing slashes, no paths. Redeploy both Node services after changing CORS on Render. Custom-domain DNS/OAuth steps: [web-client.md § Custom domain](./web-client.md#custom-domain-production-sharingbridgeorg).
 
 ---
 
@@ -262,7 +263,9 @@ See [mobile-client.md](./mobile-client.md) — mint JWT, then `flutter run` from
 | AI not used | `AI_ORCHESTRATION_BASE_URL`, `AI_*_ENABLED=true` |
 | Presets / intents lost on redeploy | Use **Supabase** + `DATABASE_URL` on both Node services — [database.md](./database.md) |
 | `DATABASE_URL` / connection errors | Use **internal** URL; run schema SQL; redeploy both services |
-| Browser **Failed to fetch** on web | `WEB_CORS_ORIGINS` on **both** backends includes the web origin; web `.env` `VITE_*` must point at the same API hosts you use for mobile |
+| Browser **Failed to fetch** on web | `WEB_CORS_ORIGINS` on **both** backends includes the web origin, **comma-separated** (not semicolons); web `.env` `VITE_*` must point at the same API hosts you use for mobile |
+| Google `Error 400: origin_mismatch` | Web OAuth client → Authorized JavaScript origins must list the **exact** origin in the address bar — apex and `www.` are separate entries |
+| Service exits with `(ENOTFOUND) tenant/user postgres.<ref> not found` | **Supabase free-tier project paused** after inactivity — Supabase dashboard → **Restore/Resume project**, then redeploy; also confirm `DATABASE_URL` still matches Connect → pooler string |
 | Local env ignored | Copy `env.example` → `.env` in each Node repo; restart `npm start` |
 | Push never arrives | `device_tokens` migration; mobile `google-services.json`; Firebase SHA; `CONNECTION_NOTIFY_WEBHOOK_*` on integration; notification `FIREBASE_SERVICE_ACCOUNT_JSON` — [notification-service-local.md](./notification-service-local.md) |
 | Webhook `401` / `403` on connection-ready | `WEBHOOK_SECRET` on notification-service must equal integration `CONNECTION_NOTIFY_WEBHOOK_SECRET`; header `X-Webhook-Secret` |

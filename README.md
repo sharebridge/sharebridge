@@ -45,7 +45,7 @@ When two docs conflict, **higher row wins** for that topic.
 | **2 — Product** | [development/PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) | Glossary, **verbiage**, actors, initiation routes |
 | **3 — Initiation flows** | [design/Eco_Kitchen_Initiation_Flow.md](design/Eco_Kitchen_Initiation_Flow.md) | Three routes, eco kitchens, connection + payment boundaries |
 | **4 — Ops model** | [design/Configurator_Role_and_Unified_Initiation.md](design/Configurator_Role_and_Unified_Initiation.md) | Configurator vs runtime owners |
-| **5 — Engineering** | [development/ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md) | Build phases, marketplace **E–I**, free-tier + scale tracks |
+| **5 — Engineering** | [development/ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md) | Build phases, marketplace **E–K**, free-tier + scale tracks |
 | **6 — Architecture** | [design/SharingBridge_Technical_Architecture.md](design/SharingBridge_Technical_Architecture.md) | Services, APIs, as-built MVP |
 | **6a — Location services** | [design/Location_Services_Vendor_Abstraction.md](design/Location_Services_Vendor_Abstraction.md) (+ [Handover_Location_Map_Picker.md](design/Handover_Location_Map_Picker.md) for shipped UX) | Handover map/geocode vendors, adapter seams, `GET /v1/geocode/reverse` |
 | **7 — Progress** | [development/STATUS.md](development/STATUS.md) | Shipped vs plan — **update when milestones land** |
@@ -86,7 +86,7 @@ PRODUCT_MODEL.md              ← WHAT (vocabulary, initiation routes)
         │                   └── Handover_Location_Map_Picker.md  ← shipped picker (step 12)
         │                             └── mobile-client.md § Handover  ← device setup (step 13)
         ├── Configurator_Role…  ← WHO owns ops vs config
-        └── ENGINEERING_PLAN…     ← HOW / WHEN (phases E–I, repos)
+        └── ENGINEERING_PLAN…     ← HOW / WHEN (phases E–K, repos)
 
 Future_Extensions.md            ← Direct-order ops A–B supplement only
 ENGINEERING_PLAN.md        ← Plan (phases, stack)
@@ -94,7 +94,7 @@ STATUS.md                       ← Shipped vs plan
 AGENT_SESSION.md                  ← Agent next tasks
 ```
 
-**Phase naming:** Future_Extensions **A–B** = order payment/delivery proof. ENGINEERING_PLAN **A–D** = AI/photo workstreams. ENGINEERING_PLAN **E–I** = marketplace engineering. (Future_Extensions Phase C is deprecated — use PRODUCT_MODEL § Marketplace.)
+**Phase naming:** Future_Extensions **A–B** = order payment/delivery proof; **C** = recurring orders; **D** = recipe BOM summary (spec in PRODUCT_MODEL § Producer supply & recipe BOM). ENGINEERING_PLAN **A–D** = AI/photo workstreams. ENGINEERING_PLAN **E–K** = marketplace engineering (J recurring orders, K recipe BOM / producer supply).
 
 ### Configuration folder
 

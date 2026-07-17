@@ -151,6 +151,26 @@ Coordinators see **all** initiators’ order intents on the integration host poi
 
 See [e2e-deployment-sequence.md](./e2e-deployment-sequence.md), [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) **§4**, and [backend-render.md](./backend-render.md).
 
+## Custom domain (production: `sharingbridge.org`)
+
+Production web runs on `https://sharingbridge.org` and `https://www.sharingbridge.org` (Render custom domains on the static site; registrar GoDaddy).
+
+1. **Render** → static site → **Settings → Custom Domains** → add `sharingbridge.org` and `www.sharingbridge.org`.
+2. **DNS (GoDaddy → DNS Management):** GoDaddy has no ALIAS/ANAME, so the apex uses an **A record**:
+   - `A` · Name `@` · Value `216.24.57.1` (Render's static-site IP, shown on the Render custom-domain page)
+   - `CNAME` · Name `www` · Value `<your-static-site>.onrender.com`
+3. **Google Console** → Web OAuth client → **Authorized JavaScript origins**: add **both** `https://sharingbridge.org` **and** `https://www.sharingbridge.org` (missing the `www` variant causes `Error 400: origin_mismatch`).
+4. **`WEB_CORS_ORIGINS`** on user-service **and** integration-service — **comma-separated** (semicolons silently break CORS → browser "Failed to fetch"):
+
+```env
+WEB_CORS_ORIGINS=https://sharingbridge.org,https://www.sharingbridge.org,https://<your-static-site>.onrender.com
+```
+
+   Redeploy both services after saving.
+5. **Mobile:** rebuild the APK with `--dart-define=WEB_DASHBOARD_URL=https://sharingbridge.org` so the home-screen dashboard link opens the custom domain — [mobile-client.md § Release APK](./mobile-client.md#release-apk-flutter-build-apk---release).
+
+The `onrender.com` URL keeps working; no `VITE_*` rebuild is needed for the domain itself (APIs stay on their Render hosts).
+
 ## Future
 
 OAuth / federated IdP replaces dev user-id + mint-token (see [authentication.md](./authentication.md)).
