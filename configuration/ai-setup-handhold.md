@@ -32,7 +32,7 @@ Other `source` values you may see:
 | `passthrough` | orchestration / integration | User input echoed or assembled; not live AI |
 | `fallback` / `fallback_error` | integration-service | Template instruction text from request fields when live pack failed |
 | `local_stub` | mobile only | Integration unreachable; on-device template from notes |
-| `mock` / `mock_fallback` | legacy | Should not appear after current deploys |
+| `mock` / `mock_fallback` | legacy | Removed — integration returns 503 if orchestration is unavailable |
 
 ---
 
@@ -288,7 +288,7 @@ Trigger one search, then filter integration logs for `suggest-vendors`:
 | `orchestration returned non-live source=passthrough` | Reachable but `AI_LLM_MODE` not `live` on orchestration |
 | *(no log line)* | Live path working — success is silent at default `LOG_LEVEL=warn` |
 
-Mobile **“Demo catalog”** banner = integration returned `mock` or `mock_fallback` (integration never got a good orchestration response).
+Mobile **503 / error** on suggest-vendors = integration could not reach orchestration (or AI flags off). Passthrough of user input happens only when ai-orchestration is up with `AI_LLM_MODE=passthrough`.
 
 ### 6d. API response `source` (quick check)
 
@@ -325,7 +325,7 @@ With `LOG_LEVEL=info` (debugging only), each instruction-pack request prints:
 |---------|--------------|-----|
 | `source: passthrough` (or legacy `deterministic`) | `AI_LLM_MODE` not `live` | Set `AI_LLM_MODE=live` on orchestration |
 | `source: mock` | Old deploy still serving demo catalog | Redeploy integration + orchestration |
-| `source: mock_fallback` | Old path; current code uses passthrough | Redeploy |
+| HTTP 503 from suggest-vendors / instruction-pack | Orchestration down, URL unset, or flags off | Wire `AI_ORCHESTRATION_*` and enable flags; use `AI_LLM_MODE=passthrough` on orchestration for non-live echo |
 | `source: fallback_error` | Groq/Gemini error | Check API keys, quotas, model names |
 | Mobile: `Instruction pack orchestration failed status=429` | Integration could not get JSON from ai-orchestration (rate limit / throttle) | Same as 429 row in §6c; confirm orchestration `/health` returns `llm_mode: live` |
 | No `location_description` | No GPS on request, or Nominatim blocked | Grant location on mobile; set `NOMINATIM_USER_AGENT` on **integration-service** |

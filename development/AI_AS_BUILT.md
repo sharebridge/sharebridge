@@ -18,7 +18,7 @@
 |------|----------|
 | **`AI_LLM_MODE=live`** + Groq + Gemini keys | Live text (Groq) and vision (Gemini) for instruction-pack / suggest-vendors |
 | **`AI_LLM_MODE=passthrough`** (or legacy `deterministic`) | No LLM — echo user `query_text` / assemble instructions from request fields. **Never** a fake restaurant catalog |
-| Flags off or orchestration unreachable | Integration may **passthrough** when `AI_MOCK_FALLBACK_ENABLED=true` (local), or **503** when unset/false (production) |
+| Flags off or orchestration unreachable | Integration returns **503** — use `AI_LLM_MODE=passthrough` on ai-orchestration when you want echo/assemble without live LLM |
 
 Clients **never** call model APIs directly. Flow: **mobile/web → integration-service → ai-orchestration → Groq/Gemini**.
 

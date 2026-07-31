@@ -82,7 +82,6 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | Variable | Local example | Render production |
 |----------|---------------|-------------------|
 | `AI_INSTRUCTION_PACK_ENABLED` | `true` | `true` |
-| `AI_MOCK_FALLBACK_ENABLED` | `true` (local dev) | **unset** — production returns HTTP 503 when orchestration fails |
 | `AI_ORCHESTRATION_BASE_URL` | `http://localhost:8091` | `https://<ai-host>.onrender.com` |
 | `AI_ORCHESTRATION_INSTRUCTION_PACK_RETRY_MAX_ATTEMPTS` | `5` | overrides default for instruction-pack only |
 | `AI_ORCHESTRATION_INSTRUCTION_PACK_TIMEOUT_MS` | `60000` | `60000` — instruction-pack only (Nominatim + Gemini vision + Groq) |
