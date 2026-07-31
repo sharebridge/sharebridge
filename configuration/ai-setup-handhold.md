@@ -19,20 +19,18 @@ Mobile and web **never** call Groq/Gemini/Nominatim directly.
 
 | Mode | Meaning | Mobile banner |
 |------|---------|---------------|
-| `passthrough` (default) | **No LLM.** Echoes user `query_text` / assembles instruction text from request fields only. **Never** invents restaurants. | Amber: no AI enrichment |
-| `deterministic` | Legacy alias of `passthrough` | Same |
-| `live` | **Real AI** when API keys are set: Groq for text, Gemini for photo vision | No notice (sources `groq`, `groq+gemini`, `gemini`) |
+| `live` (required) | **Real AI** when API keys are set: Groq for text, Gemini for photo vision. Inappropriate user input is rejected (**400**). LLM down → **503** (no raw-text echo). | No notice when `source` is live |
+| `passthrough` / `deterministic` | **Disabled** for these routes — fail closed | — |
 
-Hardcoded sample restaurants (A2B, …) exist **only in unit-test fixtures** — not on any app/runtime path.
+Hardcoded sample restaurants (A2B, …) exist **only in unit-test fixtures**. System prompts include shared content-safety rules.
 
 Other `source` values you may see:
 
 | `source` | Where | Meaning |
 |----------|-------|---------|
-| `passthrough` | orchestration / integration | User input echoed or assembled; not live AI |
-| `fallback` / `fallback_error` | integration-service | Template instruction text from request fields when live pack failed |
+| `groq` / `groq+gemini` / `gemini` | orchestration | Live LLM output |
 | `local_stub` | mobile only | Integration unreachable; on-device template from notes |
-| `mock` / `mock_fallback` | legacy | Removed — integration returns 503 if orchestration is unavailable |
+| `passthrough` / `mock` | legacy | Should not appear after current deploys |
 
 ---
 

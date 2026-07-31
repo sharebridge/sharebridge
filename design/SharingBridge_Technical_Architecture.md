@@ -85,7 +85,7 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 | **Web** | Vite + React | Fast static dashboard on Render; no SSR needed for a signed-in ops UI |
 | **Experience API** | Node 20 + `node:http` (not NestJS) | Small surface, quick to deploy on free-tier Render; enough structure without Nest ceremony |
 | **Auth / presets** | Separate `user-service` + JWT HS256 | Clear boundary: identity and presets vs journey workflow state |
-| **AI process** | Python FastAPI + direct Groq/Gemini HTTP (no LangChain) | FastAPI fits LLM/vision I/O; live mode for real suggestions; non-live **passthrough** echoes/assembles user input — never invents restaurant catalogs |
+| **AI process** | Python FastAPI + direct Groq/Gemini HTTP (no LangChain) | Live mode required; fail closed if LLM down; content-safety rules in system prompts; reject unsafe user text before calling models |
 | **Photos** | FastAPI + Cloudinary | Managed image CDN/upload without running our own object store on free tier |
 | **Push** | Firebase Cloud Messaging via notification-service | Standard Android push path for connection-ready alerts |
 | **Database** | Postgres on Supabase (+ PostGIS) | Relational + geo queries (`ST_DWithin`) for neighbourhood feeds; managed free tier |
@@ -98,11 +98,12 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 
 | `AI_LLM_MODE` | Meaning |
 |---------------|---------|
-| `live` | Groq (text) + Gemini (vision) for suggest-vendors and instruction-pack |
-| `passthrough` | No LLM — echo user search text / assemble instruction text from request fields only |
-| `deterministic` | Legacy alias of `passthrough` |
+| `live` | Groq (text) + Gemini (vision). Required for suggest-vendors / instruction-pack. |
+| LLM down / non-live | **503** — no raw user-text echo |
 
-Hardcoded sample restaurants (A2B, etc.) exist **only in unit-test fixtures**, not on any runtime path.
+User input is reject-gated for inappropriate content (**400**). System prompts include shared content-safety rules. Hardcoded sample restaurants exist **only in unit-test fixtures**.
+
+Reverse geocode is **not** an AI mode — it is `GET /v1/geocode/reverse` on integration-service (Nominatim). Setup: [ai-setup-handhold.md](../configuration/ai-setup-handhold.md).
 
 ### Location (shipped)
 

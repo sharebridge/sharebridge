@@ -16,9 +16,9 @@
 
 | Mode | Behavior |
 |------|----------|
-| **`AI_LLM_MODE=live`** + Groq + Gemini keys | Live text (Groq) and vision (Gemini) for instruction-pack / suggest-vendors |
-| **`AI_LLM_MODE=passthrough`** (or legacy `deterministic`) | No LLM — echo user `query_text` / assemble instructions from request fields. **Never** a fake restaurant catalog |
-| Flags off or orchestration unreachable | Integration returns **503** — use `AI_LLM_MODE=passthrough` on ai-orchestration when you want echo/assemble without live LLM |
+| **`AI_LLM_MODE=live`** + Groq (+ Gemini for vision) | Live enrichment. User text is reject-gated for inappropriate content (**400**). System prompts include content-safety rules. |
+| **LLM unreachable / mode not live** | **503** — fail closed; raw user text is **not** echoed downstream |
+| Flags off or orchestration unreachable | Integration returns **503** |
 
 Clients **never** call model APIs directly. Flow: **mobile/web → integration-service → ai-orchestration → Groq/Gemini**.
 
@@ -70,7 +70,7 @@ AI_INSTRUCTION_PACK_ENABLED=true
 **ai-orchestration:**
 
 ```env
-AI_LLM_MODE=live          # or passthrough (no LLM; echo user input)
+AI_LLM_MODE=live          # required; non-live fails closed (no raw user-text echo)
 GROQ_API_KEY=
 GEMINI_API_KEY=
 PHOTO_SERVICE_BASE_URL=http://localhost:8092
