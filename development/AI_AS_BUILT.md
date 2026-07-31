@@ -16,11 +16,13 @@
 
 | Mode | Behavior |
 |------|----------|
-| **`AI_LLM_MODE=deterministic`** (orchestration) | Ranked mock / template responses — used in CI and offline dev |
-| **`AI_LLM_MODE=live`** + Groq + Gemini keys | Live text (Groq) and vision (Gemini) for instruction-pack |
-| Flags off or orchestration unreachable | Integration may return mock (dev) or **503** when `AI_MOCK_FALLBACK_ENABLED=false` (production default) |
+| **`AI_LLM_MODE=live`** + Groq + Gemini keys | Live text (Groq) and vision (Gemini) for instruction-pack / suggest-vendors |
+| **`AI_LLM_MODE=passthrough`** (or legacy `deterministic`) | No LLM — echo user `query_text` / assemble instructions from request fields. **Never** a fake restaurant catalog |
+| Flags off or orchestration unreachable | Integration may **passthrough** when `AI_MOCK_FALLBACK_ENABLED=true` (local), or **503** when unset/false (production) |
 
 Clients **never** call model APIs directly. Flow: **mobile/web → integration-service → ai-orchestration → Groq/Gemini**.
+
+Hardcoded sample vendors (A2B, …) live only under **unit-test fixtures**.
 
 Reverse geocode (`GET /v1/geocode/reverse`, Nominatim) lives on **integration-service**, not ai-orchestration.
 
@@ -68,7 +70,7 @@ AI_INSTRUCTION_PACK_ENABLED=true
 **ai-orchestration:**
 
 ```env
-AI_LLM_MODE=live          # or deterministic
+AI_LLM_MODE=live          # or passthrough (no LLM; echo user input)
 GROQ_API_KEY=
 GEMINI_API_KEY=
 PHOTO_SERVICE_BASE_URL=http://localhost:8092

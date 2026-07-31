@@ -33,7 +33,7 @@ Vite/React web ──┘           │
 | Web | Vite + React | Static dashboard on Render |
 | Experience API | Node 20 HTTP | Small BFF; fast free-tier deploys |
 | Auth | user-service + Google JWT | Identity separate from journeys |
-| AI | FastAPI + Groq/Gemini | Live instructions; deterministic mode for CI |
+| AI | FastAPI + Groq/Gemini | Live enrichment in production; otherwise passthrough of user input (no fake vendor catalogs) |
 | Photos | Cloudinary | Managed uploads without our own object store |
 | Data | Supabase Postgres + PostGIS | Geo neighbourhood feeds |
 | Host | Render + `sharingbridge.org` | Low-cost Git-linked hosting |

@@ -77,7 +77,7 @@ Key integration routes: `suggest-vendors`, `instruction-pack`, `order-intents`, 
 | Vendor suggestions | **Yes** | `POST /v1/donor-setup/suggest-vendors` → orchestration; mock only if flags off or orchestration down |
 | Instruction pack | **Yes** | `POST /v1/donor-seeker/instruction-pack` → orchestration; mobile local stub if API unreachable |
 | Live Groq + Gemini | **Yes** | `AI_LLM_MODE=live` in ai-orchestration + API keys |
-| Deterministic / CI | **Yes** | `AI_LLM_MODE=deterministic` (default for offline CI) |
+| Deterministic / offline stub | **Passthrough** | Echo/assemble user input when not live — **no fake vendor catalog** (catalog fixtures = unit tests only) |
 | Reference photo upload | **Yes** | photo-service → Cloudinary |
 | Vision in instruction chain | **Yes** when live | Gemini analyzes photo URL; Groq composes text |
 | Face match / delivery verify | **No** | Future phase D |

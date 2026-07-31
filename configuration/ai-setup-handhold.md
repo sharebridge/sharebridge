@@ -1,13 +1,13 @@
 # AI setup handhold — Groq, Gemini, and Nominatim
 
-Step-by-step wiring for **live** AI in SharingBridge. Use this when you want real LLM output instead of template/mock data.
+Step-by-step wiring for **live** AI in SharingBridge. Use this when you want Groq/Gemini enrichment instead of passthrough of what the user typed.
 
 **Repos involved**
 
 | Service | Port (local) | Role |
 |---------|--------------|------|
-| `sharingbridge-ai-orchestration` | 8091 | Groq + Gemini + Nominatim |
-| `sharingbridge-integration-service` | 8080 | Proxies mobile/web to orchestration |
+| `sharingbridge-ai-orchestration` | 8091 | Groq + Gemini |
+| `sharingbridge-integration-service` | 8080 | Proxies mobile/web to orchestration; Nominatim reverse geocode |
 | `sharingbridge-photo-service` | 8092 | Signed photo URLs for Gemini vision |
 | `sharingbridge-mobile-app` | — | Sends queries, GPS, photo URLs |
 
@@ -19,19 +19,20 @@ Mobile and web **never** call Groq/Gemini/Nominatim directly.
 
 | Mode | Meaning | Mobile banner |
 |------|---------|---------------|
-| `deterministic` (default) | **Not real AI.** Fixed Chennai-style catalog and template instruction text in Python. Safe for CI and offline dev. | Amber notice: sample/template mode |
-| `live` | **Real AI** when API keys are set: Groq for text, Gemini for photo vision, Nominatim for GPS → place name | No notice (sources `groq`, `groq+gemini`, `gemini`) |
+| `passthrough` (default) | **No LLM.** Echoes user `query_text` / assembles instruction text from request fields only. **Never** invents restaurants. | Amber: no AI enrichment |
+| `deterministic` | Legacy alias of `passthrough` | Same |
+| `live` | **Real AI** when API keys are set: Groq for text, Gemini for photo vision | No notice (sources `groq`, `groq+gemini`, `gemini`) |
 
-**`deterministic` is mock/template data**, not a “reproducible AI” mode. The API still returns useful demo content, but it is not from Groq or Gemini.
+Hardcoded sample restaurants (A2B, …) exist **only in unit-test fixtures** — not on any app/runtime path.
 
 Other `source` values you may see:
 
 | `source` | Where | Meaning |
 |----------|-------|---------|
-| `mock` | integration-service | Built-in demo catalog when orchestration is disabled or unreachable |
-| `mock_fallback` | integration-service | Orchestration call failed; fell back to demo catalog |
-| `fallback` / `fallback_error` | integration-service | Template instruction text when live pack failed |
-| `local_stub` | mobile only | Integration unreachable; on-device template |
+| `passthrough` | orchestration / integration | User input echoed or assembled; not live AI |
+| `fallback` / `fallback_error` | integration-service | Template instruction text from request fields when live pack failed |
+| `local_stub` | mobile only | Integration unreachable; on-device template from notes |
+| `mock` / `mock_fallback` | legacy | Should not appear after current deploys |
 
 ---
 
@@ -199,7 +200,7 @@ curl -X POST http://localhost:8080/v1/initiator-setup/suggest-vendors `
 ```
 
 **Live success:** JSON includes `"source": "groq"` (or similar live value).  
-**Template:** `"source": "deterministic"` or `"mock"` → check `AI_LLM_MODE` and keys.
+**Passthrough:** `"source": "passthrough"` (or legacy `"deterministic"`) → check `AI_LLM_MODE=live` and keys.
 
 ### 5c. Instruction pack (with GPS + optional photo)
 
@@ -273,8 +274,8 @@ Trigger one search, then filter integration logs for `suggest-vendors`:
 
 | Log line | Meaning |
 |----------|---------|
-| `using mock catalog: AI_ORCHESTRATION_BASE_URL is unset` | Integration env not wired (or old deploy) |
-| `using mock catalog: AI_SUGGEST_VENDORS_ENABLED is not true` | Flag off on integration |
+| `using passthrough of query_text: AI_ORCHESTRATION_BASE_URL is unset` | Integration env not wired (or old deploy) |
+| `using passthrough of query_text: AI_SUGGEST_VENDORS_ENABLED is not true` | Flag off on integration |
 | `[suggest-vendors] phase=orchestration_api status=401` | `AI_ORCHESTRATION_INTERNAL_API_KEY` mismatch |
 | `[instruction-pack] phase=integration_http_timeout code=timeout` | Instruction-pack exceeded timeout (often after enabling live Gemini vision) | Set `AI_ORCHESTRATION_INSTRUCTION_PACK_TIMEOUT_MS=60000` on **integration-service** and redeploy |
 | No `location_description` / `seeker_handover_hints` at all | Mobile timed out while orchestration still running | Rebuild mobile app (35s instruction-pack timeout); check for `source: local_stub` banner |
@@ -284,7 +285,7 @@ Trigger one search, then filter integration logs for `suggest-vendors`:
 | `phase=orchestration_http_non_json` + `body_kind=plain_rate_limit` + `body="Too Many Requests"` | HTTP/proxy plain-text 429 **before** FastAPI JSON — not a malformed request body | Check **ai-orchestration** logs for matching `[suggest-vendors] start` / `[instruction-pack] start`; if absent, request never reached the app (proxy/CDN). Integration retries 5× (`[orchestration] ... retry` with `phase=` and `body_kind=`); wait 2 minutes between manual retries |
 | `phase=orchestration_api` + `code=rate_limited` + `detail=` | FastAPI returned JSON rate limit (Groq/Gemini quota) | Check Groq/Gemini dashboards and ai-orchestration logs |
 | `phase=orchestration_http_non_json` + `body_kind=json_parse_failed` | Malformed JSON from ai-orchestration HTTP response | Check ai-orchestration logs for crash/partial response |
-| `orchestration returned non-live source=deterministic` | Reachable but `AI_LLM_MODE` not `live` on orchestration |
+| `orchestration returned non-live source=passthrough` | Reachable but `AI_LLM_MODE` not `live` on orchestration |
 | *(no log line)* | Live path working — success is silent at default `LOG_LEVEL=warn` |
 
 Mobile **“Demo catalog”** banner = integration returned `mock` or `mock_fallback` (integration never got a good orchestration response).
@@ -322,20 +323,20 @@ With `LOG_LEVEL=info` (debugging only), each instruction-pack request prints:
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| `source: deterministic` | `AI_LLM_MODE` not `live` | Set `AI_LLM_MODE=live` on orchestration |
-| `source: mock` | Integration flags off or wrong `AI_ORCHESTRATION_BASE_URL` | Enable `AI_*_ENABLED`, fix URL |
-| `source: mock_fallback` | Orchestration down or 5xx | Start uvicorn; check Render logs |
+| `source: passthrough` (or legacy `deterministic`) | `AI_LLM_MODE` not `live` | Set `AI_LLM_MODE=live` on orchestration |
+| `source: mock` | Old deploy still serving demo catalog | Redeploy integration + orchestration |
+| `source: mock_fallback` | Old path; current code uses passthrough | Redeploy |
 | `source: fallback_error` | Groq/Gemini error | Check API keys, quotas, model names |
 | Mobile: `Instruction pack orchestration failed status=429` | Integration could not get JSON from ai-orchestration (rate limit / throttle) | Same as 429 row in §6c; confirm orchestration `/health` returns `llm_mode: live` |
-| No `location_description` | No GPS on request, or Nominatim blocked | Grant location on mobile; set `NOMINATIM_USER_AGENT` |
+| No `location_description` | No GPS on request, or Nominatim blocked | Grant location on mobile; set `NOMINATIM_USER_AGENT` on **integration-service** |
 | No `image_description` | No photo URL, Gemini key, or deprecated model | Upload photo; set `GEMINI_API_KEY`; use `GEMINI_VISION_MODEL=gemini-2.5-flash` (not `gemini-2.0-flash`, shut down June 2026) |
-| Mobile banner always shows | Still on deterministic/mock path | Complete steps in §3–§5 |
+| Mobile banner always shows | Still on passthrough / non-live path | Complete steps in §3–§5 |
 
 ---
 
 ## 8. Cost and safety notes
 
-- Groq and Gemini bill/quote per token; use `deterministic` for automated tests and demos without spend.
+- Groq and Gemini bill/quote per token; use `passthrough` for local runs without spend. Hardcoded vendor catalogs are **unit-test fixtures only**.
 - Never commit `.env` files or paste keys into chat/logs.
 - Rotate keys if exposed.
 
