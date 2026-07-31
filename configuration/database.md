@@ -6,7 +6,7 @@ There is **no** runtime fallback to JSON files after cutover — import once, th
 
 > **SQL run order (start here):** [database-setup-sequence.md](./database-setup-sequence.md) — progressive **1 → M5** + notification deploy.
 
-**Related:** [authentication.md](./authentication.md) · [backend-render.md](./backend-render.md) · [e2e-deployment-sequence.md](./e2e-deployment-sequence.md) · [README.md § Documentation guide](../README.md#documentation-guide)
+**Related:** [authentication.md](./authentication.md) · [backend-render.md](./backend-render.md) · [e2e-deployment-sequence.md](./e2e-deployment-sequence.md) · [README.md § Documentation guide](../README.md#documentation-map)
 
 ---
 

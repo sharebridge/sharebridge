@@ -41,6 +41,7 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 | **Handover map + geocode** | [Handover_Location_Map_Picker.md](../design/Handover_Location_Map_Picker.md) | **Shipped** | Map picker + `/v1/geocode/reverse`; redeploy integration-service on hosted envs |
 | **Web mobile UX (Initiations / Actions)** | web-app | **Shipped** | Coordinator dashboard layout fixes on narrow viewports |
 | **Custom domain (production web)** | [web-client.md § Custom domain](../configuration/web-client.md#custom-domain-production-sharingbridgeorg) | **Shipped** | `sharingbridge.org` + `www` on Render static site; Google origins + `WEB_CORS_ORIGINS` updated; APK rebuild with new `WEB_DASHBOARD_URL` pending |
+| **Web Help + GitHub README** | web-app sign-in / header | **Shipped** | Sign-in: Google + README link; Help dialog on sign-in and dashboard header |
 | **Marketplace F–K** | IMPLEMENTATION § F–K | **Not started** | Beneficiary profile, transport, allocation, recurring orders, recipe BOM / producer supply |
 | **AI bridge** | AI_PLAN | **Shipped** | integration → ai-orchestration; flags on by default in `env.example` |
 | **AI live models** | AI_PLAN | **Shipped** | `AI_LLM_MODE=live` + Groq/Gemini keys — [ai-setup-handhold.md](../configuration/ai-setup-handhold.md) |

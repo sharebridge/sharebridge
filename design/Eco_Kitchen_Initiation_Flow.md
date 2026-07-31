@@ -4,7 +4,7 @@
 
 **Status:** Design approved (June 2026). **Phase 1–2 shipped:** copy + consent UI. **Phase 3 shipped:** order codes, `initiation_route`, consent API. **Phase 4 shipped:** `GET /v1/connections/:orderCode`, web Connection panel, FCM webhook path (`CONNECTION_NOTIFY_WEBHOOK_URL`). **Phase 5 shipped:** mobile **Eco kitchen · I pay** route. **Phase 6 shipped:** unified eco kitchen labels, kitchen-commit copy on Actions, per-route initiation display.
 
-**Doc map:** [README.md § Documentation guide](../README.md#documentation-guide)
+**Doc map:** [README.md § Documentation guide](../README.md#documentation-map)
 
 | Also read | For |
 |-----------|-----|
@@ -109,7 +109,7 @@ See [field-handoff.md](../configuration/field-handoff.md), [Future_Extensions.md
 
 ---
 
-## 5. Route 2 — Eco kitchen · I pay (planned)
+## 5. Route 2 — Eco kitchen · I pay (shipped)
 
 | Step | Actor | Action |
 |------|--------|--------|
@@ -203,8 +203,8 @@ Before a user **opens for pledging**, **pledges**, **opts for eco kitchen · I p
 |--------|--------|------------|
 | Choose **For pledging** on mobile | Initiator | Consent dialog on **Start initiation** + checkbox on record screen |
 | **Pledge** on web **Actions** tab | Pledger | Consent panel; pledge buttons disabled until checked (session) |
-| **Eco kitchen · I pay** | Initiator | Consent dialog (when route ships) |
-| **Kitchen commits** | Eco kitchen account | Consent before commit (when self-service ships) |
+| **Eco kitchen · I pay** | Initiator | Consent dialog (shipped) |
+| **Kitchen commits** | Eco kitchen account | Consent before commit (when self-service kitchen UI ships) |
 
 **Direct order** does not share emails with eco kitchens — no extra consent beyond sign-in.
 

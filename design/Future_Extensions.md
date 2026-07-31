@@ -2,35 +2,34 @@
 
 **Purpose:** Technical supplement for **order operations** — payer marks payment done (Phase A), delivery proof (Phase B), recurring orders (Phase C), and recipe-BOM ingredient demand for producers (Phase D summary — vocabulary lives in PRODUCT_MODEL). **Not** the full marketplace roadmap.
 
-**Read first:** [README.md § Documentation guide](../README.md#documentation-guide) — doc hierarchy and reading order.
+**Read first:** [README.md](../README.md) · shipped baseline: [STATUS.md](../development/STATUS.md).
 
 | Topic | Authoritative doc |
 |-------|-------------------|
 | Glossary, actors, marketplace, dashboard UX | [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) |
 | Configurator, payer, unified initiation | [Configurator_Role_and_Unified_Initiation.md](./Configurator_Role_and_Unified_Initiation.md) |
-| Engineering phases E–K, repos, AI timeline | [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) § Marketplace phases |
-| Producer supply, recipe BOM, UOM vocabulary | [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) § Producer supply & recipe BOM |
+| Engineering phases E–K | [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) § Marketplace phases |
+| Producer supply, recipe BOM, UOM | [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) § Producer supply & recipe BOM |
 | SQL run order | [database-setup-sequence.md](../configuration/database-setup-sequence.md) |
-
-**Related:** [SharingBridge_End_to_End_Workflow.md](./SharingBridge_End_to_End_Workflow.md) · [database.md](../configuration/database.md) · [authentication.md](../configuration/authentication.md)
+| Stack today | [Technical Architecture § As-built](./SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026) |
 
 ---
 
 ## What exists today (baseline)
 
+Do not duplicate the full shipped table here — see **[STATUS.md](../development/STATUS.md)**.
+
+Order-ops relevant facts for this file:
+
 | Capability | Status |
 |------------|--------|
-| Initiator registers **order initiation** after copying delivery instructions | Shipped |
-| Fields: pack id, notes, preset snapshot, `instructions_copied` status | Shipped |
-| Initiator lists **own** initiations (mobile); coordinator lists **all** (web) | Shipped |
-| Geo on order intent (`location_lat/lng`, `locality_key`); initiator neighbourhood feed; PostGIS `ST_DWithin` list queries | Shipped — [database.md](../configuration/database.md) |
-| Mobile handover map picker + server reverse geocode | Shipped — [Handover_Location_Map_Picker.md](./Handover_Location_Map_Picker.md); vendor strategy [Location_Services_Vendor_Abstraction.md](./Location_Services_Vendor_Abstraction.md) |
-| **Mark payment done** (web `PATCH /v1/order-intents/:id`, `payment_status` → `paid_externally`); coordinator may set `delivery_status` / `delivery_photo_url` | Shipped |
-| Coordinator web **Map** tab (`VITE_GOOGLE_MAPS_API_KEY`) | Shipped — bbox/clustering refinements open |
-| Delivery photo **capture flow**, delivery-partner role | **Planned** (Phase B — PATCH fields exist, no partner UX) |
-| Locality demand + eco kitchen commitments | [Eco_Kitchen_Initiation_Flow.md](./Eco_Kitchen_Initiation_Flow.md); engineering phases E–K in [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) |
+| Order intents + neighbourhood geo feed | Shipped |
+| Mark payment done (web) | Shipped |
+| Map tab (web) | Shipped |
+| Delivery photo **capture** / delivery-partner UX | **Open** (Phase B) |
+| Recurring orders / recipe BOM | **Future** (Phases C–D) |
 
-Payments for food still happen in **vendor apps** (Swiggy, Zomato, etc.). SharingBridge tracks **intent and status**, not card charges, unless a later scope explicitly adds audited payment references.
+Payments stay in vendor apps. SharingBridge tracks intent and status.
 
 ---
 

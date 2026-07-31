@@ -803,7 +803,7 @@ Walk through **§3f**; step 4 must show **Order intent registered** (or **update
 
 ### 3h. Handover map picker (mobile)
 
-**Docs:** [mobile-client.md § Handover](../configuration/mobile-client.md#handover-location--map-picker-address-pickup-note) · reading steps **10–13** in [README.md § Documentation guide](../README.md#documentation-guide).
+**Docs:** [mobile-client.md § Handover](../configuration/mobile-client.md#handover-location--map-picker-address-pickup-note) · reading steps **10–13** in [README.md § Documentation guide](../README.md#documentation-map).
 
 **Prerequisites:** integration-service deployed with `GET /v1/geocode/reverse` (hosted or local **§2**); initiator JWT (Google or dev token).
 

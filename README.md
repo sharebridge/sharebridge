@@ -1,260 +1,107 @@
 # SharingBridge — Community meal coordination platform
 
-> Affordable meals with dignity—for anyone who needs food, and for the people who arrange or pay for it
+> Affordable meals with dignity — for anyone who needs food, and for the people who arrange or pay for it
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
+**Live web:** [https://sharingbridge.org](https://sharingbridge.org) · **Docs repo:** this repository · **Progress:** [STATUS.md](development/STATUS.md)
 
-SharingBridge is a mobile/web application that helps people **arrange and pay for meals**—for themselves, family, seniors, neighbours, or anyone they meet who needs food—through standard menus and third-party delivery or local vendors. The platform coordinates intent and handover; **payments stay with vendors** (facilitator, not merchant of record).
+## What it is
 
-## Contributor notes (read this first)
+SharingBridge helps people **arrange meals** — for themselves, family, seniors, neighbours, or anyone they meet who needs food. Initiators use a **Flutter** mobile app; ops/neighbourhood views use a **React** web dashboard. The platform tracks **intent and handover**; **payments stay with vendors** (Swiggy, Zomato, eco kitchens). SharingBridge is never the merchant of record.
 
-Product-level assumptions: [SharingBridge_Business_Requirement.md](requirements/SharingBridge_Business_Requirement.md) § Operating Constraints. **Inclusive language** (initiator, payer, beneficiary, meal arrangement — not alms/donation framing): [PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) § Documentation verbiage.
+**Shipped today (MVP):** Google sign-in, Help a seeker (direct order), eco-kitchen routes (pledge / I pay), Actions board, Connection + FCM, handover map + reverse geocode, AI instruction packs (Groq/Gemini), neighbourhood dashboard. Details: [STATUS.md](development/STATUS.md).
 
-**AI-assisted development:** Code and docs are produced in AI-assisted sessions. **Progress vs plan:** [STATUS.md](development/STATUS.md). **How to run:** [configuration/README.md](configuration/README.md).
-
-## Documentation guide
-
-New here or unsure which file to open? Use this section. It defines **reading order**, **authority** (which doc wins when they disagree), and pointers — not duplicate content.
-
-### Quick paths by goal
-
-| I want to… | Read in order |
-|------------|----------------|
-| **Run the stack from scratch** | [configuration/README.md](configuration/README.md) → [e2e-deployment-sequence.md](configuration/e2e-deployment-sequence.md) → [database-setup-sequence.md](configuration/database-setup-sequence.md) |
-| **Understand what is shipped vs plan** | [development/STATUS.md](development/STATUS.md) |
-| **Engineering plan (long-term)** | [development/ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md) |
-| **Agent session (next tasks)** | [development/AGENT_SESSION.md](development/AGENT_SESSION.md) |
-| **Product vocabulary, verbiage & marketplace** | [development/PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) § Documentation verbiage |
-| **Configurator, unified initiation, payer** | [design/Configurator_Role_and_Unified_Initiation.md](design/Configurator_Role_and_Unified_Initiation.md) |
-| **Eco kitchens — three routes, connection, payment boundaries** | [design/Eco_Kitchen_Initiation_Flow.md](design/Eco_Kitchen_Initiation_Flow.md) |
-| **Handover location & map vendors** | [field-handoff.md](configuration/field-handoff.md) → [Location_Services_Vendor_Abstraction.md](design/Location_Services_Vendor_Abstraction.md) → [Handover_Location_Map_Picker.md](design/Handover_Location_Map_Picker.md) → [mobile-client.md § Handover](configuration/mobile-client.md#handover-location--map-picker-address-pickup-note) |
-| **How we build (phases, repos, AI)** | [development/ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md) |
-| **BRD steps 1–12 with diagrams** | [design/SharingBridge_End_to_End_Workflow.md](design/SharingBridge_End_to_End_Workflow.md) |
-| **Order payment / delivery proof** | [design/Future_Extensions.md](design/Future_Extensions.md) § Phase A–B only |
-| **Manual test on device** | [testing/MANUAL_TESTING_GUIDE.md](testing/MANUAL_TESTING_GUIDE.md) |
-
-### Document hierarchy (authority)
-
-When two docs conflict, **higher row wins** for that topic.
-
-| Layer | Document | Owns |
-|-------|----------|------|
-| **1 — Requirements** | [requirements/SharingBridge_Business_Requirement.md](requirements/SharingBridge_Business_Requirement.md) | BRD, operating constraints |
-| **2 — Product** | [development/PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) | Glossary, **verbiage**, actors, initiation routes |
-| **3 — Initiation flows** | [design/Eco_Kitchen_Initiation_Flow.md](design/Eco_Kitchen_Initiation_Flow.md) | Three routes, eco kitchens, connection + payment boundaries |
-| **4 — Ops model** | [design/Configurator_Role_and_Unified_Initiation.md](design/Configurator_Role_and_Unified_Initiation.md) | Configurator vs runtime owners |
-| **5 — Engineering** | [development/ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md) | Build phases, marketplace **E–K**, free-tier + scale tracks |
-| **6 — Architecture** | [design/SharingBridge_Technical_Architecture.md](design/SharingBridge_Technical_Architecture.md) | Services, APIs, as-built MVP |
-| **6a — Location services** | [design/Location_Services_Vendor_Abstraction.md](design/Location_Services_Vendor_Abstraction.md) (+ [Handover_Location_Map_Picker.md](design/Handover_Location_Map_Picker.md) for shipped UX) | Handover map/geocode vendors, adapter seams, `GET /v1/geocode/reverse` |
-| **7 — Progress** | [development/STATUS.md](development/STATUS.md) | Shipped vs plan — **update when milestones land** |
-| **8 — Agent sessions** | [development/AGENT_SESSION.md](development/AGENT_SESSION.md) | Next tasks, runbook, recent commits |
-| **9 — Run & configure** | [configuration/](configuration/) | Deploy, env, auth, SQL sequence |
-| **10 — Supplement** | [design/Future_Extensions.md](design/Future_Extensions.md) | Direct-order ops Phase A–B only |
-
-Do not create parallel product-model files. Extend **PRODUCT_MODEL.md** (vocabulary), **Eco_Kitchen_Initiation_Flow.md** (initiation routes), or **ENGINEERING_PLAN.md** (engineering phases).
-
-### Natural reading order (onboarding)
+## Architecture (simple)
 
 ```text
-1. requirements/SharingBridge_Business_Requirement.md     — business context
-2. development/PRODUCT_MODEL.md                       — terms, actors, routes
-3. design/Eco_Kitchen_Initiation_Flow.md                — three initiation routes (authoritative)
-4. design/Configurator_Role_and_Unified_Initiation.md   — configurator, no daily ops desk
-5. development/STATUS.md                              — shipped vs plan
-6. development/AGENT_SESSION.md                         — agent sessions (optional)
-7. design/SharingBridge_End_to_End_Workflow.md          — journey diagrams
-8. configuration/e2e-deployment-sequence.md            — deploy
-9. configuration/database-setup-sequence.md            — SQL order
-10. configuration/field-handoff.md                     — Help a seeker: handover in the user journey
-11. design/Location_Services_Vendor_Abstraction.md      — map/geocode vendor strategy (why + seams)
-12. design/Handover_Location_Map_Picker.md             — shipped cab-style picker + API
-13. configuration/mobile-client.md § Handover location — device setup (`GOOGLE_MAPS_API_KEY` in `local.properties` only)
-14. Other deep dives as needed (auth, testing, web-client, environment-variables)
-```
-
-**Handover location** spans **configuration** (journey + runbook) and **design** (strategy + shipped UX). Follow steps **10 → 13** in order — do not skip to map-picker design without field-handoff context.
-
-### Roadmap docs — how they relate
-
-```text
-PRODUCT_MODEL.md              ← WHAT (vocabulary, initiation routes)
-        ├── Eco_Kitchen_Initiation_Flow.md  ← three routes, connection, payment boundaries
-        │         ├── field-handoff.md  ← direct order capture (step 10)
-        │         └── Location_Services_Vendor_Abstraction.md  ← map/geocode vendors (step 11)
-        │                   └── Handover_Location_Map_Picker.md  ← shipped picker (step 12)
-        │                             └── mobile-client.md § Handover  ← device setup (step 13)
-        ├── Configurator_Role…  ← WHO owns ops vs config
-        └── ENGINEERING_PLAN…     ← HOW / WHEN (phases E–K, repos)
-
-Future_Extensions.md            ← Direct-order ops A–B supplement only
-ENGINEERING_PLAN.md        ← Plan (phases, stack)
-STATUS.md                       ← Shipped vs plan
-AGENT_SESSION.md                  ← Agent next tasks
-```
-
-**Phase naming:** Future_Extensions **A–B** = order payment/delivery proof; **C** = recurring orders; **D** = recipe BOM summary (spec in PRODUCT_MODEL § Producer supply & recipe BOM). ENGINEERING_PLAN **A–D** = AI/photo workstreams. ENGINEERING_PLAN **E–K** = marketplace engineering (J recurring orders, K recipe BOM / producer supply).
-
-### Configuration folder
-
-Runbooks and env wiring only. **Product/design docs live under `design/`** — see [Design folder](#design-folder) below.
-
-| Doc | Purpose |
-|-----|---------|
-| [configuration/README.md](configuration/README.md) | Deploy phases 0–5 |
-| [database-setup-sequence.md](configuration/database-setup-sequence.md) | **SQL run order** |
-| [database.md](configuration/database.md) | Supabase / local Postgres |
-| [e2e-deployment-sequence.md](configuration/e2e-deployment-sequence.md) | OAuth → Render → verify |
-| [environment-variables.md](configuration/environment-variables.md) | All env keys |
-| [field-handoff.md](configuration/field-handoff.md) | Help a seeker / order intent — **start handover reading at step 10** |
-| [mobile-client.md](configuration/mobile-client.md) | Mobile URLs, handover runbook — **step 13** in [natural reading order](#natural-reading-order-onboarding) |
-
-### Design folder
-
-| Doc | Purpose | Reading step |
-|-----|---------|--------------|
-| [Eco_Kitchen_Initiation_Flow.md](design/Eco_Kitchen_Initiation_Flow.md) | Three initiation routes | 3 |
-| [Location_Services_Vendor_Abstraction.md](design/Location_Services_Vendor_Abstraction.md) | Map/geocode vendor strategy | 11 |
-| [Handover_Location_Map_Picker.md](design/Handover_Location_Map_Picker.md) | Cab-style handover map picker (shipped) | 12 |
-| [SharingBridge_Technical_Architecture.md](design/SharingBridge_Technical_Architecture.md) | Services, APIs, as-built MVP | after 11 for stack context |
-| [Future_Extensions.md](design/Future_Extensions.md) | Direct-order ops Phase A–B | supplement |
-
-## Key Features
-
-- 🤝 **Dignity-first** — Respectful process for initiators, payers, and people receiving meals
-- 🔒 **Handover guidance** - Fixed in-app copy for consent and surroundings (BRD step 4); geo safety service deferred
-- 📱 **Multi-Platform** - iOS, Android, and Web applications
-- 🛡️ **Facilitator-only money** - Payments and authoritative financial records stay with vendors/providers; see BRD *Operating Constraints*
-- 📸 **Photo Verification** - Transparent delivery confirmation
-- 🌐 **Multi-Vendor Support** - Integration with Swiggy, Zomato, Uber Eats
-
-## Repository Structure
-
-This is the **master repository** for SharingBridge (GitHub: [`sharingbridge/sharingbridge`](https://github.com/sharingbridge/sharingbridge)), containing documentation and overall coordination.
-
-### Child Repositories (Independent Development)
-
-**Frontend:**
-- `sharingbridge-mobile-app` - Mobile application (Flutter)
-- `sharingbridge-web-app` - Web application (Vite + React; coordinator dashboard)
-
-**Backend Services:**
-- `sharingbridge-api-gateway` - API gateway and routing
-- `sharingbridge-order-service` - Order management
-- `sharingbridge-user-service` - User authentication and profiles
-- `sharingbridge-integration-service` - Vendor integrations (Swiggy, Zomato)
-- `sharingbridge-notification-service` - Notifications
-
-**AI/ML:**
-- `sharingbridge-location-safety` - **Archived / deferred** (MVP uses mobile guidance only)
-- `sharingbridge-photo-service` - Face detection and verification
-
-**Infrastructure:**
-- `sharingbridge-infra` - Infrastructure as Code
-- `sharingbridge-deployment` - CI/CD pipelines
-
-Each repository evolves independently. Coordination happens here through GitHub Discussions and `development/AGENT_SESSION.md`.
-
-**Note:** Documentation is maintained within each service repository rather than in a separate docs repo.
-
-## Project Status
-
-🚧 **Status:** MVP in active development (mobile, web, integration-service on Render)  
-📅 **Product model:** Eco kitchens + three initiation routes — [Eco_Kitchen_Initiation_Flow.md](design/Eco_Kitchen_Initiation_Flow.md)
-
-## Problem Statement
-
-Cash is ambiguous; **meals are concrete**. SharingBridge helps initiators and payers turn “this person needs food” (or “my parent needs lunch”) into a **tracked meal arrangement**—standard items, vendor payment, optional neighbourhood coordination—without the platform holding money.
-
-## Solution
-
-A facilitator platform that:
-1. Connects **initiators and payers** with **people who need meals** (beneficiaries)
-2. Shows handover guidance so the supporter can judge consent and surroundings (mobile; no geo safety score in MVP)
-3. Creates orders through established food delivery platforms (or future direct-vendor flows)
-4. Redirects payment to vendor or licensed provider systems (SharingBridge does not own financial tracking responsibility)
-5. Confirms delivery with photo verification
-
-## Technology Stack
-
-**As-built (Render MVP)** — full detail in [Technical Architecture § As-built](design/SharingBridge_Technical_Architecture.md#as-built-architecture-june-2026).
-
-### Frontend
-- **Mobile:** Flutter (`sharingbridge-mobile-app`)
-- **Web:** Vite + React (`sharingbridge-web-app`)
-
-### Backend (MVP)
-- **Experience API:** Node.js 20 — `sharingbridge-integration-service` (shared BFF for mobile + web)
-- **System API:** Node.js 20 — `sharingbridge-user-service` (JWT, vendor presets / `donor_presets` table)
-- **Process APIs:** FastAPI — `sharingbridge-ai-orchestration`, `sharingbridge-photo-service`
-- **Database:** PostgreSQL (Supabase)
-
-### AI/ML (MVP)
-- **LLM:** Groq (text) + Gemini (vision) via ai-orchestration; `deterministic` mode for CI/offline
-- **Geo:** Nominatim reverse geocode on integration-service (`/v1/geocode/reverse`); Google Maps **tiles only** on mobile when configured — [Location_Services_Vendor_Abstraction.md](design/Location_Services_Vendor_Abstraction.md)
-- **Location safety service:** deferred; handover guidance in-app
-
-### Infrastructure (MVP)
-- **Hosting:** Render.com (APIs + static web)
-- **CI/CD:** GitHub Actions per repo
-
-**Scale target** (not MVP deploy): NestJS, API gateway, Redis/SQS, EKS — see [ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md).
-
-## Architecture Highlights
-
-```
 Flutter mobile ──┐
                  ├──► integration-service (Experience API / BFF)
 Vite/React web ──┘           │
-                               ├──► user-service → Postgres (presets, auth)
-                               ├──► ai-orchestration → Groq / Gemini / Nominatim
-                               ├──► Postgres (order intents, marketplace, device_tokens)
-                               ├──► photo-service (reference photos)
-                               └──► notification-service (FCM on kitchen commit)
+                               ├──► user-service → Postgres (auth, presets)
+                               ├──► ai-orchestration → Groq / Gemini
+                               ├──► photo-service → Cloudinary
+                               ├──► notification-service → FCM
+                               └──► Postgres / PostGIS (order intents, marketplace)
                                          ↓
-                              Vendor deep links (Swiggy, Zomato, …)
+                              Vendor deep links (payment off-platform)
 ```
 
-**Eco kitchen stack:** `sharingbridge-notification-service` (FCM) — [configuration/notification-service-local.md](configuration/notification-service-local.md) · progressive setup [database-setup-sequence.md](configuration/database-setup-sequence.md).
+| Piece | Tech | Why (short) |
+|-------|------|-------------|
+| Mobile | Flutter | One app for Android field flows |
+| Web | Vite + React | Static dashboard on Render |
+| Experience API | Node 20 HTTP | Small BFF; fast free-tier deploys |
+| Auth | user-service + Google JWT | Identity separate from journeys |
+| AI | FastAPI + Groq/Gemini | Live instructions; deterministic mode for CI |
+| Photos | Cloudinary | Managed uploads without our own object store |
+| Data | Supabase Postgres + PostGIS | Geo neighbourhood feeds |
+| Host | Render + `sharingbridge.org` | Low-cost Git-linked hosting |
 
-**Not on Render for MVP:** api-gateway, order-service, location-safety (archived).
+**Full stack + rationale:** [Technical Architecture § As-built](design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026).
 
-## Security & Privacy
+## Repositories (shipped)
 
-- 🔐 JWT-based authentication
-- 🔒 End-to-end encryption for sensitive data
-- 🗑️ Auto-deletion of photos after 30 days
-- ✅ GDPR/DPDPA compliant
-- 🚫 No platform-owned payment ledger; minimize stored payment-related data (see BRD *Operating Constraints*)
+| Repo | Role |
+|------|------|
+| `sharingbridge` (this) | Docs and coordination |
+| `sharingbridge-mobile-app` | Flutter initiator app |
+| `sharingbridge-web-app` | Vite + React dashboard |
+| `sharingbridge-integration-service` | Experience API / BFF |
+| `sharingbridge-user-service` | Auth + vendor presets |
+| `sharingbridge-ai-orchestration` | LLM pipelines |
+| `sharingbridge-photo-service` | Photo upload |
+| `sharingbridge-notification-service` | FCM on kitchen commit |
 
-## Getting Started
+**Not started:** `api-gateway`, `order-service`, `infra`. **Archived:** `location-safety`.
 
-1. Read [Documentation guide](#documentation-guide) above.
-2. Follow [configuration/e2e-deployment-sequence.md](configuration/e2e-deployment-sequence.md) (Phases 0–5).
-3. Run SQL in order: [configuration/database-setup-sequence.md](configuration/database-setup-sequence.md).
-4. Verify: [testing/MANUAL_TESTING_GUIDE.md](testing/MANUAL_TESTING_GUIDE.md).
+## Documentation map
+
+When docs disagree, **higher row wins**.
+
+| Layer | Doc | Owns |
+|-------|-----|------|
+| 1 | [BRD](requirements/SharingBridge_Business_Requirement.md) | Operating constraints |
+| 2 | [PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) | Vocabulary, actors, routes |
+| 3 | [Eco_Kitchen_Initiation_Flow.md](design/Eco_Kitchen_Initiation_Flow.md) | Three initiation routes |
+| 4 | [Technical Architecture § As-built](design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026) | Stack & services **today** |
+| 5 | [STATUS.md](development/STATUS.md) | Shipped vs plan |
+| 6 | [configuration/](configuration/) | Run, deploy, env, SQL |
+| 7 | [ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md) | Long-term / scale plan (aspirational) |
+| 8 | [Future_Extensions.md](design/Future_Extensions.md) | Recurring orders, delivery proof, BOM vision |
+
+### Quick links
+
+| I want to… | Open |
+|------------|------|
+| See what is shipped | [STATUS.md](development/STATUS.md) |
+| Deploy / run | [configuration/README.md](configuration/README.md) → [e2e-deployment-sequence.md](configuration/e2e-deployment-sequence.md) |
+| SQL order | [database-setup-sequence.md](configuration/database-setup-sequence.md) |
+| Manual test | [MANUAL_TESTING_GUIDE.md](testing/MANUAL_TESTING_GUIDE.md) |
+| Product terms | [PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) |
+| Agent next tasks | [AGENT_SESSION.md](development/AGENT_SESSION.md) |
+| Handover map | [field-handoff.md](configuration/field-handoff.md) → [Location ADR](design/Location_Services_Vendor_Abstraction.md) → [Map picker](design/Handover_Location_Map_Picker.md) |
+
+**Language:** prefer **initiator / payer / beneficiary** in prose — not donation/alms framing. Legacy API names (`donor_*`) remain until renamed. See [PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) § Documentation verbiage.
+
+## Security (as-built)
+
+- Google Sign-In → JWT (HS256) shared across services  
+- CORS allowlist on user-service + integration-service (`WEB_CORS_ORIGINS`, comma-separated)  
+- No platform payment ledger; minimize payment-related storage (BRD)  
+- Reference photos via Cloudinary; **face-match / delivery proof capture not shipped**
+
+## Getting started
+
+1. [STATUS.md](development/STATUS.md) — what works today  
+2. [e2e-deployment-sequence.md](configuration/e2e-deployment-sequence.md) — Phases 0–5  
+3. [database-setup-sequence.md](configuration/database-setup-sequence.md) — SQL order  
+4. [MANUAL_TESTING_GUIDE.md](testing/MANUAL_TESTING_GUIDE.md) — verify  
 
 ## Contributing
 
-We welcome contributors from all backgrounds - technical and non-technical!
-
-- **Technical Contributors:** Developers, DevOps, AI/ML engineers - see [CALL_FOR_CONTRIBUTORS.md](development/CALL_FOR_CONTRIBUTORS.md)
-- **Non-Technical Contributors:** Humanitarian workers, legal advisors, community volunteers, government liaisons - your expertise is crucial! Join our GitHub Discussions.
-- **AI-Assisted Development:** Code and docs are produced through AI-assisted sessions. Coordination: [AGENT_SESSION.md](development/AGENT_SESSION.md). Run/deploy setup: [configuration/](configuration/README.md).
-
-See [CALL_FOR_CONTRIBUTORS.md](development/CALL_FOR_CONTRIBUTORS.md) for detailed guidance.
+Technical and non-technical contributors welcome — [CALL_FOR_CONTRIBUTORS.md](development/CALL_FOR_CONTRIBUTORS.md). AI-assisted sessions are coordinated in [AGENT_SESSION.md](development/AGENT_SESSION.md).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-All contributions will be licensed under the MIT License.
-
-## Contact
-
-For inquiries about the SharingBridge project, please contact the development team.
-
----
-
-*Building technology that serves humanity with dignity and compassion.*
+MIT — see [LICENSE](LICENSE).

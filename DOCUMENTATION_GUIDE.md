@@ -1,5 +1,6 @@
 # Documentation guide
 
-**This content lives in the repo README** — [README.md § Documentation guide](./README.md#documentation-guide).
+**Start here:** [README.md](./README.md) — product overview, stack, and doc map.
 
-That section is the single source of truth for reading order, doc authority, roadmap relationships, configuration pointers, and **inclusive product verbiage** ([PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) § Documentation verbiage).
+Shipped vs plan: [development/STATUS.md](./development/STATUS.md).  
+Architecture today: [design/SharingBridge_Technical_Architecture.md § As-built](./design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026).

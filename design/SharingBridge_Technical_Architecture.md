@@ -1,148 +1,136 @@
 # SharingBridge - Technical Architecture Document
 
-**Project:** SharingBridge - Community meal coordination platform  
-**Version:** 1.0  
-**Date:** December 25, 2025  
-**Status:** Design + as-built MVP (see § [As-built architecture](#as-built-architecture-june-2026))  
-**Last aligned (operating assumptions):** June 2026
+**Project:** SharingBridge — community meal coordination platform  
+**Status:** As-built MVP is authoritative below. Sections **1–10** are a longer **scale / target** reference and may name NestJS, Kong, EKS, etc. — those are **not** the Render MVP unless repeated in As-built.  
+**Last aligned:** July 2026
 
 ---
 
 ## Assumptions Reference
 
-For product-level assumptions, use [SharingBridge_Business_Requirement.md](../requirements/SharingBridge_Business_Requirement.md), section **“Operating Constraints & Assumptions”** as the single source of truth.
+Product constraints: [SharingBridge_Business_Requirement.md](../requirements/SharingBridge_Business_Requirement.md) § Operating Constraints.  
+Product language: [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md). Progress: [STATUS.md](../development/STATUS.md).
 
-If this architecture document conflicts with that BRD section (for example in proposed pledge or ledger schemas), follow the BRD.
-
-**Product language (2026):** Docs use **initiator**, **payer**, **beneficiary**, and **meal arrangement** — not alms/donation/donor in prose. Reserve **payee** for payment **recipients** (vendor/kitchen). Legacy schema and API names below (e.g. `donation_type`, `/donor-setup`) are unchanged until code migration; see [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) § Documentation verbiage.
-
-## MVP Implementation Decisions
-
-Original build targets (some superseded — see **As-built** below):
-
-- **Mobile client framework:** **Flutter** (shipped)
-- **Backend:** Node.js services (shipped as plain Node 20 HTTP servers, not NestJS)
-- **Web:** React (shipped as **Vite + React** static site, not Next.js)
-
-Notes:
-- Mentions of NestJS, Next.js, React Native, Kong, EKS, and LangChain elsewhere in this document are **target or scale options**, not the active Render MVP unless stated in [As-built architecture](#as-built-architecture-june-2026).
-- **Deploy truth:** `configuration/backend-render.md`, `development/AGENT_SESSION.md`.
+**MVP choices (shipped):** Flutter mobile · Vite + React web · Node 20 HTTP services (not NestJS) · FastAPI for AI/photo · Postgres on Supabase · Render hosting.
 
 ---
 
-## As-built architecture (June 2026)
+## As-built architecture (July 2026)
 
-This section describes what is **running in code and on Render today**. It overrides conflicting framework names in later sections of this document.
+What is **running in code and on Render today**. This section wins over conflicting names elsewhere in this file.
 
-### Pattern names (expert dialogue)
+### In one paragraph
 
-| Label | How SharingBridge uses it |
-|-------|---------------------------|
-| **Microservices / polyrepo** | Independent repos per service; coordination in master `sharingbridge` docs repo |
-| **Experience API** | `sharingbridge-integration-service` — initiator/coordinator **journey-shaped** HTTP surface (`/v1/initiator-setup/*`, `/v1/order-intents`, legacy `/v1/donor-*`) |
-| **Shared BFF** | One experience layer for **Flutter mobile** and **Vite/React web** (not separate mobile/web BFFs yet) |
-| **API composition / bridge** | Integration validates auth, calls ai-orchestration and user-service, applies fallbacks (`mock`, `deterministic`, `fallback`) |
-| **Process APIs** | `sharingbridge-ai-orchestration` (LLM pipelines), `sharingbridge-photo-service` (upload + signed URLs) |
-| **System APIs** | `sharingbridge-user-service` (JWT mint, initiator vendor presets in Postgres `donor_presets`) |
-| **Facilitator platform** | Deep links to vendor apps; no platform-owned payment ledger |
+Mobile (Flutter) and web (Vite/React) talk to one **Experience API** (`integration-service`). That service validates JWTs, owns order intents / marketplace workflow state, and calls other services when needed: **user-service** (auth + presets), **ai-orchestration** (vendor suggestions + delivery instructions via Groq/Gemini), **photo-service** (Cloudinary uploads), and **notification-service** (FCM after kitchen commit). Postgres on Supabase is the system of record. Payments never enter SharingBridge — clients deep-link into vendor apps.
 
-**Not deployed for MVP:** `sharingbridge-api-gateway`, `sharingbridge-order-service`, `sharingbridge-notification-service`, `sharingbridge-location-safety` (archived).
-
-### Three-layer request flow
+### Request flow
 
 ```mermaid
 flowchart TB
   subgraph clients["Clients"]
-    M[sharingbridge-mobile-app\nFlutter]
-    W[sharingbridge-web-app\nVite + React]
+    M[Flutter mobile]
+    W[Vite + React web]
   end
 
   subgraph experience["Experience layer"]
-    INT["sharingbridge-integration-service :8080\nExperience API / shared BFF"]
+    INT["integration-service :8080\nExperience API / BFF"]
   end
 
-  subgraph process["Process layer"]
-    AI["sharingbridge-ai-orchestration :8091\nFastAPI + Groq/Gemini"]
-    PHO["sharingbridge-photo-service :8092\nFastAPI + Cloudinary"]
+  subgraph process["Process"]
+    AI["ai-orchestration :8091\nFastAPI · Groq / Gemini"]
+    PHO["photo-service :8092\nFastAPI · Cloudinary"]
+    NOT["notification-service :8093\nFCM"]
   end
 
   subgraph system["System of record"]
-    USR["sharingbridge-user-service :8081\nNode 20"]
+    USR["user-service :8081\nJWT · presets"]
     PG[(Postgres / Supabase)]
   end
 
   M --> INT
   W --> INT
+  W --> USR
   INT --> USR
   INT --> AI
   INT --> PG
-  AI --> PHO
-  AI --> EXT["Groq / Gemini / Nominatim"]
+  INT --> NOT
+  INT --> PHO
+  AI --> EXT["Groq / Gemini"]
   USR --> PG
+  PHO --> CLOUD["Cloudinary"]
 ```
 
-Clients **never** call user-service, ai-orchestration, or model providers directly.
+Clients use **integration-service** for journeys. Web also calls **user-service** for Google sign-in / JWT mint. Model providers are never called from the browser or phone.
 
-### What `integration-service` owns vs delegates
+### Services (what each does)
 
-| Concern | Owner | Notes |
-|---------|-------|-------|
-| Initiator-facing REST contracts | **Integration** | OpenAPI in `design/contracts/` |
-| JWT validation, initiator role, CORS | **Integration** | Shared with user-service signing secret |
-| Initiator vendor presets CRUD | **Delegates** → user-service | `PreferencesRepository` forwards bearer token |
-| Suggest vendors, instruction-pack | **Orchestrates** → ai-orchestration | Mock/template fallback on failure |
-| Order intents, neighbourhood feed | **Integration** | SQL via `SqlOrderIntentStore` (`GIS_SCHEMA` / `geoSql.js`) |
-| Coordinator list views | **Integration** | Role-based formatting on order intents |
-| Vendor Swiggy/Zomato API adapters | **Future** | Deep links today; §3.5 target |
+| Layer | Service | Role today |
+|-------|---------|------------|
+| Clients | `sharingbridge-mobile-app` | Initiator flows: presets, Help a seeker, eco kitchen, handover map |
+| Clients | `sharingbridge-web-app` | Dashboard: Initiations, Actions, Map, Connection, Help → GitHub README |
+| Experience | `sharingbridge-integration-service` | Journey APIs, order intents, demand board, geocode reverse, CORS |
+| System | `sharingbridge-user-service` | Google OAuth → JWT, vendor presets (`donor_presets`) |
+| Process | `sharingbridge-ai-orchestration` | Suggest vendors + instruction-pack (Groq text, Gemini vision) |
+| Process | `sharingbridge-photo-service` | Reference photo upload (Cloudinary); **not** face-match |
+| Process | `sharingbridge-notification-service` | FCM push on kitchen commit (wire per env) |
+| Data | Supabase Postgres + PostGIS | Users, intents, marketplace tables, device tokens |
 
-This is an **Experience API**, not a pure reverse proxy: it **shapes responses for product journeys** and **owns workflow state** (order intents) while **delegating** identity-linked presets to user-service.
+**Not built for MVP:** `api-gateway`, `order-service`, `infra`. **Archived:** `location-safety`.
 
-### Shipped technology stack
+### Technology stack and why we chose it
 
-| Component | Repo | Runtime / framework |
-|-----------|------|---------------------|
-| Mobile initiator UI | `sharingbridge-mobile-app` | **Flutter** (feature folders: data / domain / application / presentation) |
-| Web coordinator dashboard | `sharingbridge-web-app` | **Vite + React 19**, Vitest |
-| Experience API | `sharingbridge-integration-service` | **Node.js 20** (`node:http`, no NestJS) |
-| User / auth API | `sharingbridge-user-service` | **Node.js 20**, Google Sign-In, JWT HS256 |
-| AI orchestration | `sharingbridge-ai-orchestration` | **Python 3.10+**, **FastAPI**, uvicorn; direct Groq/Gemini HTTP (no LangChain in MVP) |
-| Photo upload | `sharingbridge-photo-service` | **FastAPI**, Cloudinary |
-| Database | Supabase Postgres | `pg` driver on Node services; `DATABASE_URL` |
-| Hosting (MVP) | Render.com | Web services + static site; see `configuration/backend-render.md` |
+| Choice | What we use | Why |
+|--------|-------------|-----|
+| **Mobile** | Flutter | One codebase for Android (primary) and iOS later; strong offline-friendly UI for field “Help a seeker” flows |
+| **Web** | Vite + React | Fast static dashboard on Render; no SSR needed for a signed-in ops UI |
+| **Experience API** | Node 20 + `node:http` (not NestJS) | Small surface, quick to deploy on free-tier Render; enough structure without Nest ceremony |
+| **Auth / presets** | Separate `user-service` + JWT HS256 | Clear boundary: identity and presets vs journey workflow state |
+| **AI process** | Python FastAPI + direct Groq/Gemini HTTP (no LangChain) | FastAPI fits LLM/vision I/O; direct SDKs keep the MVP debuggable; `deterministic` mode for CI without API keys |
+| **Photos** | FastAPI + Cloudinary | Managed image CDN/upload without running our own object store on free tier |
+| **Push** | Firebase Cloud Messaging via notification-service | Standard Android push path for connection-ready alerts |
+| **Database** | Postgres on Supabase (+ PostGIS) | Relational + geo queries (`ST_DWithin`) for neighbourhood feeds; managed free tier |
+| **Hosting** | Render (APIs + static site) + custom domain `sharingbridge.org` | Zero/low-cost deploy, Git-linked deploys; GoDaddy DNS for the public site |
+| **Maps (tiles)** | Google Maps SDK on Android when keyed | Familiar cab-style picker; key stays in `local.properties`, not Dart |
+| **Reverse geocode** | Nominatim on integration-service | No Google Geocoding bill for MVP; postal/`locality_key` derivation server-side |
+| **Payments** | Vendor deep links only | BRD: facilitator, not merchant of record — no wallet or ledger |
 
 ### AI modes
 
 | `AI_LLM_MODE` | Meaning |
 |---------------|---------|
-| `deterministic` | Template/mock catalog and instructions in Python — **not live LLM** |
-| `live` | Groq (text) + Gemini (vision) + Nominatim (reverse geocode, no API key) |
+| `deterministic` | Templates/mocks in Python — CI / offline |
+| `live` | Groq (text) + Gemini (vision) for suggest-vendors and instruction-pack |
 
-Setup: [configuration/ai-setup-handhold.md](../configuration/ai-setup-handhold.md). Mobile shows an amber notice when API `source` is not live.
+Reverse geocode is **not** an AI mode — it is `GET /v1/geocode/reverse` on integration-service (Nominatim). Setup: [ai-setup-handhold.md](../configuration/ai-setup-handhold.md).
 
-### Mobile internal pattern
+### Location (shipped)
 
-Within Flutter, initiator flows use **ports-and-adapters / clean architecture**: repository interfaces, use cases, HTTP adapters, DTOs. That is **client-side layering**, separate from the backend Experience API pattern.
+| Capability | Vendor | Notes |
+|------------|--------|-------|
+| Map tiles (mobile) | Google Maps when `GOOGLE_MAPS_API_KEY` set | UI flag: `HANDOVER_MAP_ENABLED` |
+| Reverse geocode | Nominatim via integration | Returns label + `locality_key` |
+| Persist | Postgres on order intent | `location_lat` / `lng` / `label` |
 
-### Location services (as-built + vendor strategy)
+Strategy ADR: [Location_Services_Vendor_Abstraction.md](./Location_Services_Vendor_Abstraction.md). UX: [Handover_Location_Map_Picker.md](./Handover_Location_Map_Picker.md).
 
-Handover location uses **one vendor per capability** with **thin adapter seams** (full ADR: [Location_Services_Vendor_Abstraction.md](./Location_Services_Vendor_Abstraction.md); reading order: [README.md § Natural reading order](../README.md#documentation-guide) steps **10 → 13**):
+### What integration owns vs delegates
 
-| Capability | v1 vendor | Stable contract |
-|------------|-----------|-----------------|
-| Map tiles (mobile) | Google Maps SDK when `GOOGLE_MAPS_API_KEY` in `local.properties`; else form fallback | `HandoverLocationPicker` (`HANDOVER_MAP_ENABLED`) |
-| Reverse geocode + `locality_key` | Nominatim on integration-service | `GET /v1/geocode/reverse` |
-| Persisted handover | — | `location_lat`, `location_lng`, `location_label` |
-
-Map picker UX: [Handover_Location_Map_Picker.md](./Handover_Location_Map_Picker.md). Mobile setup: [mobile-client.md](../configuration/mobile-client.md).
-
-Older sections below that describe a dedicated **location-safety** microservice or Google-heavy geocoding on clients are **target/legacy reference** — not the shipped MVP path.
+| Concern | Owner |
+|---------|-------|
+| Initiator/coordinator journey REST | Integration |
+| JWT validation, CORS | Integration (+ shared secret with user-service) |
+| Vendor presets CRUD | Delegates → user-service |
+| Suggest vendors / instruction-pack | Orchestrates → ai-orchestration |
+| Order intents, neighbourhood, marketplace board | Integration (Postgres) |
+| FCM after kitchen commit | Integration webhook → notification-service |
+| Swiggy/Zomato APIs | **Not shipped** — deep links only |
 
 ---
 
 ## Table of Contents
 
-- **[Assumptions Reference](#assumptions-reference)** (single source of truth in BRD)
-- **[As-built architecture (June 2026)](#as-built-architecture-june-2026)** (deploy truth; overrides conflicting framework names below)
+- **[As-built architecture (July 2026)](#as-built-architecture-july-2026)** ← **start here**
+- Sections 1–10 below = scale / historical target design (may conflict with As-built)
 
 1. [System Overview](#1-system-overview)
 2. [Architecture Diagram](#2-architecture-diagram)
@@ -160,9 +148,11 @@ Older sections below that describe a dedicated **location-safety** microservice 
 ## 1. System Overview
 [↑ Back to Table of Contents](#table-of-contents)
 
+> **Scale / target section.** For what runs today, use [As-built](#as-built-architecture-july-2026).
+
 ### 1.1 Architecture Principles
 - **Microservices-based** - Loosely coupled services for independent scaling
-- **Experience API edge** - Clients call `integration-service` only; internal services stay behind it (see [As-built](#as-built-architecture-june-2026))
+- **Experience API edge** - Clients call `integration-service` only; internal services stay behind it (see [As-built](#as-built-architecture-july-2026))
 - **Cloud-native** - Containerized Python services; stateless Node APIs on Render for MVP
 - **API-first** - Well-defined contracts between services (`design/contracts/`)
 - **Event-driven** (target) - Asynchronous order tracking; MVP paths are mostly synchronous HTTP
@@ -678,7 +668,7 @@ photos
 
 ### 3.5 Integration Service
 
-**Architectural role (as-built):** **Experience API** / **shared BFF** — the only backend mobile and web call for initiator and coordinator journeys. Composes user-service, ai-orchestration, and Postgres order-intent data; applies auth, CORS, and degraded-mode fallbacks. See [As-built architecture](#as-built-architecture-june-2026).
+**Architectural role (as-built):** **Experience API** / **shared BFF** — the only backend mobile and web call for initiator and coordinator journeys. Composes user-service, ai-orchestration, and Postgres order-intent data; applies auth, CORS, and degraded-mode fallbacks. See [As-built architecture](#as-built-architecture-july-2026).
 
 **Shipped responsibilities (MVP):**
 - Vendor preset setup: suggest-vendors, preferences proxy to user-service

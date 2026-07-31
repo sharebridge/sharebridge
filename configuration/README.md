@@ -1,10 +1,10 @@
 # SharingBridge configuration — start here
 
-**One place to orient yourself.** This folder is **how to run and wire** the MVP (product design — see [README.md § Documentation guide](../README.md#documentation-guide)).
+**One place to orient yourself.** This folder is **how to run and wire** the MVP (product design — see [README.md § Documentation guide](../README.md#documentation-map)).
 
 | Your goal | Follow this path |
 |-----------|------------------|
-| **Which doc to read (full map)** | [README.md § Documentation guide](../README.md#documentation-guide) |
+| **Which doc to read (full map)** | [README.md § Documentation guide](../README.md#documentation-map) |
 | **First-time setup (recommended)** | [e2e-deployment-sequence.md](./e2e-deployment-sequence.md) — Phases **0 → 5** in order |
 | **Database SQL in correct order** | [database-setup-sequence.md](./database-setup-sequence.md) |
 | **Local only (laptop)** | Phase 0–1 in [e2e-deployment-sequence.md](./e2e-deployment-sequence.md) → [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) §3 (mobile) / §4 (web) |
@@ -42,7 +42,7 @@ Optional branches (any time after Phase 1):
 - **AI suggestions:** [ai-orchestration-local.md](./ai-orchestration-local.md)
 - **Live AI keys (Groq, Gemini, Nominatim):** [ai-setup-handhold.md](./ai-setup-handhold.md)
 - **Field flow (BRD):** [field-handoff.md](./field-handoff.md)
-- **Handover location (steps 10–13):** [field-handoff.md](./field-handoff.md) → [Location_Services_Vendor_Abstraction.md](../design/Location_Services_Vendor_Abstraction.md) → [Handover_Location_Map_Picker.md](../design/Handover_Location_Map_Picker.md) → [mobile-client.md § Handover](./mobile-client.md#handover-location--map-picker-address-pickup-note) — full index: [README.md § Documentation guide](../README.md#documentation-guide)
+- **Handover location (steps 10–13):** [field-handoff.md](./field-handoff.md) → [Location_Services_Vendor_Abstraction.md](../design/Location_Services_Vendor_Abstraction.md) → [Handover_Location_Map_Picker.md](../design/Handover_Location_Map_Picker.md) → [mobile-client.md § Handover](./mobile-client.md#handover-location--map-picker-address-pickup-note) — full index: [README.md § Documentation guide](../README.md#documentation-map)
 
 ---
 
@@ -61,11 +61,11 @@ Optional branches (any time after Phase 1):
 | **Web dashboard (Vite, CORS)** | [web-client.md](./web-client.md) |
 | **Mobile URLs (emulator, phone, Wi‑Fi)** | [mobile-client.md](./mobile-client.md) |
 | **Handover location (read in order)** | [field-handoff.md](./field-handoff.md) → [Location_Services_Vendor_Abstraction.md](../design/Location_Services_Vendor_Abstraction.md) → [Handover_Location_Map_Picker.md](../design/Handover_Location_Map_Picker.md) → [mobile-client.md § Handover](./mobile-client.md#handover-location--map-picker-address-pickup-note) |
-| **Full doc index & reading order** | [README.md § Documentation guide](../README.md#documentation-guide) |
+| **Full doc index & reading order** | [README.md § Documentation guide](../README.md#documentation-map) |
 | **Manual test scripts** | [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) — **§4d–4g** (Actions, Connection, FCM) |
 | **Product model (authoritative)** | [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) |
 | **Order-ops supplement (A–B)** | [Future_Extensions.md](../design/Future_Extensions.md) |
-| **Agent / development docs** | [README.md](../README.md#documentation-guide) · [AGENT_SESSION.md](../development/AGENT_SESSION.md) |
+| **Agent / development docs** | [README.md](../README.md#documentation-map) · [AGENT_SESSION.md](../development/AGENT_SESSION.md) |
 
 ---
 

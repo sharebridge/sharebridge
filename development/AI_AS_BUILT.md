@@ -2,7 +2,7 @@
 
 **Purpose:** How AI is **wired today** (not a future plan). Phased roadmap and provider split: [AI_PLAN.md](./AI_PLAN.md). Progress snapshot: [STATUS.md](./STATUS.md) § AI.
 
-**Last updated:** June 2026
+**Last updated:** July 2026
 
 ---
 
@@ -22,6 +22,8 @@
 
 Clients **never** call model APIs directly. Flow: **mobile/web → integration-service → ai-orchestration → Groq/Gemini**.
 
+Reverse geocode (`GET /v1/geocode/reverse`, Nominatim) lives on **integration-service**, not ai-orchestration.
+
 ---
 
 ## Architecture
@@ -35,10 +37,10 @@ sharingbridge-mobile-app / sharingbridge-web-app
               ▼
    sharingbridge-ai-orchestration  (FastAPI)
               ├── Groq  (text: suggest-vendors, instruction compose)
-              ├── Gemini (vision: reference photo → descriptions)
-              └── Nominatim (geocode for locality_key)
-              │
+              └── Gemini (vision: reference photo → descriptions)
+
    sharingbridge-photo-service  (reference upload — separate HTTP from mobile)
+   Nominatim  ← called by integration-service /v1/geocode/reverse (not AI)
 ```
 
 **Not used:** LangChain in shipped code (direct HTTP/SDK). **Deferred:** `sharingbridge-location-safety` (archived).

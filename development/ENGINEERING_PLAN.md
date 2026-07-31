@@ -1,14 +1,14 @@
 # SharingBridge — engineering plan
 
-**Version:** 2.2  
-**Date:** June 2026  
+**Version:** 2.3  
+**Date:** July 2026  
 **Status:** Long-term engineering plan (free-tier MVP + production scale track).
 
-> **Doc map:** [README.md § Documentation guide](../README.md#documentation-guide)  
-> **Product vocabulary:** [PRODUCT_MODEL.md](./PRODUCT_MODEL.md)  
-> **Progress vs this plan:** [STATUS.md](./STATUS.md) — **update STATUS, not this file**, when milestones ship.  
-> **Agent sessions:** [AGENT_SESSION.md](./AGENT_SESSION.md) (next tasks, runbook).  
-> **SQL / deploy:** [database-setup-sequence.md](../configuration/database-setup-sequence.md).
+> **As-built truth:** [STATUS.md](./STATUS.md) and [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026).  
+> This file may still mention NestJS, Next.js, React Native, Kong, order-service, or “photo not wired” — treat those as **aspirational / scale** unless STATUS says shipped.  
+> **Update STATUS, not this file**, when milestones land.
+
+> **Doc map:** [README.md](../README.md) · **Product vocabulary:** [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) · **Agent sessions:** [AGENT_SESSION.md](./AGENT_SESSION.md) · **SQL / deploy:** [database-setup-sequence.md](../configuration/database-setup-sequence.md).
 
 ---
 

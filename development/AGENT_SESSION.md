@@ -28,10 +28,10 @@ Full progress vs plan: **[STATUS.md](./STATUS.md)**.
 | **SQL order** | [configuration/database-setup-sequence.md](../configuration/database-setup-sequence.md) |
 | **Manual tests** | [testing/MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) |
 | **Eco kitchen flows** | [design/Eco_Kitchen_Initiation_Flow.md](../design/Eco_Kitchen_Initiation_Flow.md) |
-| **Handover location (steps 10–13)** | [README.md § Documentation guide](../README.md#documentation-guide) — field-handoff → vendor ADR → map picker → mobile-client |
+| **Handover location** | [README.md § Quick links](../README.md#quick-links) — field-handoff → vendor ADR → map picker → mobile-client |
 | **AI as-built** | [AI_AS_BUILT.md](./AI_AS_BUILT.md) |
 | **AI future phases** | [AI_PLAN.md](./AI_PLAN.md) |
-| **Full doc index** | [README.md § Documentation guide](../README.md#documentation-guide) |
+| **Full doc index** | [README.md](../README.md) |
 
 Prefer `configuration/*` and `MANUAL_TESTING_GUIDE.md` over per-repo READMEs for runbooks.
 
@@ -67,10 +67,11 @@ Google sign-in and emulator URLs: [configuration/mobile-client.md](../configurat
 
 ## Next recommended tasks
 
-1. **Transactional email** — Resend/SendGrid in notification-service.
-2. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
-3. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
-4. **Mobile Connection UI** — in-app order-code lookup.
+1. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
+2. **Transactional email** — Resend/SendGrid in notification-service.
+3. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
+4. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
+5. **APK rebuild** — `WEB_DASHBOARD_URL=https://sharingbridge.org`.
 
 After shipping, update [STATUS.md](./STATUS.md) workstream table.
 
@@ -100,5 +101,7 @@ After shipping, update [STATUS.md](./STATUS.md) workstream table.
 - `fix` (mobile): Android build toolchain — AGP 8.11.1, Gradle 8.14, Kotlin 2.3.20, `compilerOptions` DSL.
 - `ops`: custom domain `sharingbridge.org` + `www` live (GoDaddy DNS → Render); Google origins + comma-separated `WEB_CORS_ORIGINS` on both backends.
 - `docs`: Future_Extensions Phase C (recurring orders) + Phase D summary; PRODUCT_MODEL § Producer supply & recipe BOM; ENGINEERING_PLAN phases J–K.
+- `feat` (web): Help dialog + GitHub README on sign-in; simplified sign-in copy.
+- `docs`: README + As-built architecture rewritten (stack + why); trimmed outdated README claims; STATUS remains source of truth for shipped.
 
 Older history: git log on `sharingbridge` and service repos.

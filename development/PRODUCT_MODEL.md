@@ -2,7 +2,7 @@
 
 **Purpose:** **Authoritative product vocabulary**, actors, marketplace model, and neighbourhood dashboard spec (June 2026).
 
-**Doc map:** [README.md § Documentation guide](../README.md#documentation-guide) — reading order and which file wins when docs disagree.
+**Doc map:** [README.md § Documentation guide](../README.md#documentation-map) — reading order and which file wins when docs disagree.
 
 | Also read | For |
 |-----------|-----|
@@ -110,8 +110,8 @@ Never use **payee** for the mobile app user, JWT role, or initiator/payer.
 | Lane | Status | Initiator | Payment |
 |------|--------|-----------|---------|
 | **A — Direct order** | Shipped | Initiator | Initiator → vendor app (external) |
-| **B — Eco kitchen · open for pledging** | Partial | Initiator opens; pledgers fund | Pledgers → eco kitchen off-platform after **connection** |
-| **C — Eco kitchen · I pay** | Planned | Initiator | Initiator → eco kitchen off-platform after **connection** |
+| **B — Eco kitchen · open for pledging** | Shipped (Actions / Connection) | Initiator opens; pledgers fund | Pledgers → eco kitchen off-platform after **connection** |
+| **C — Eco kitchen · I pay** | Shipped (mobile) | Initiator | Initiator → eco kitchen off-platform after **connection** |
 | **D — Meal arrangement / recurring** | Future | Demand initiator | Family / self-funded plans |
 
 Authoritative step-by-step flows: [Eco_Kitchen_Initiation_Flow.md](../design/Eco_Kitchen_Initiation_Flow.md).
@@ -123,8 +123,8 @@ Authoritative step-by-step flows: [Eco_Kitchen_Initiation_Flow.md](../design/Eco
 | Route | Label | Shipped? |
 |-------|-------|----------|
 | 1 | **Direct order** | Yes (`order_intents`, Help a seeker) |
-| 2 | **Eco kitchen · I pay** | Design + mobile teaser only |
-| 3 | **Eco kitchen · open for pledging** | Partial (`seeker_demands` + Actions pledges) |
+| 2 | **Eco kitchen · I pay** | Yes (mobile + Connection) |
+| 3 | **Eco kitchen · open for pledging** | Yes (`seeker_demands` + Actions pledges) |
 
 **SharingBridge never** processes payments, publishes phone numbers in listings, or sends QR/payment links by email. See [Eco_Kitchen_Initiation_Flow.md](../design/Eco_Kitchen_Initiation_Flow.md) §7–8.
 
@@ -267,7 +267,7 @@ Delivery detail: [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md). Order-ops phases 
 
 ## Related docs
 
-- [README.md § Documentation guide](../README.md#documentation-guide) — master index
+- [README.md § Documentation guide](../README.md#documentation-map) — master index
 - [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) — phased delivery, repos
 - [STATUS.md](./STATUS.md) — progress snapshot
 - [database-setup-sequence.md](../configuration/database-setup-sequence.md) — SQL order for marketplace
