@@ -32,7 +32,8 @@ Vite/React web ──┘           │
 | Mobile | Flutter | One app for Android field flows |
 | Web | Vite + React | Static dashboard on Render |
 | Experience API | Node 20 HTTP | Small BFF; fast free-tier deploys |
-| Auth | user-service + Google JWT | Identity separate from journeys |
+| Auth | **C#** user-service + Google JWT | Identity separate from journeys; ASP.NET Core on Render Docker |
+| Notifications | Node today → **Spring Boot** next | Keep FCM webhook; rewrite when capacity allows |
 | AI | FastAPI + Groq/Gemini | Live enrichment required; fail closed if LLM down; prompts include content-safety rules |
 | Photos | Cloudinary | Managed uploads without our own object store |
 | Data | Supabase Postgres + PostGIS | Geo neighbourhood feeds |
@@ -48,10 +49,10 @@ Vite/React web ──┘           │
 | `sharingbridge-mobile-app` | Flutter initiator app |
 | `sharingbridge-web-app` | Vite + React dashboard |
 | `sharingbridge-integration-service` | Experience API / BFF |
-| `sharingbridge-user-service` | Auth + vendor presets |
+| `sharingbridge-user-service` | Auth + vendor presets (**ASP.NET Core / C#**; Node under `legacy-node/`) |
 | `sharingbridge-ai-orchestration` | LLM pipelines |
 | `sharingbridge-photo-service` | Photo upload |
-| `sharingbridge-notification-service` | FCM on kitchen commit |
+| `sharingbridge-notification-service` | FCM on kitchen commit (**Node today**; planned rewrite to **Spring Boot**) |
 
 **Not started:** `api-gateway`, `order-service`, `infra`. **Archived:** `location-safety`.
 

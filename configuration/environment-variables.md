@@ -11,7 +11,7 @@ Tables are sorted **A–Z by variable name** to match Render’s environment UI.
 | mobile-app | `--dart-define=…` on `flutter run` | compile time (no `.env` in repo) |
 | notification-service | `sharingbridge-notification-service/.env` | `npm start` |
 | photo-service | `sharingbridge-photo-service/.env` | `uvicorn` / pytest |
-| user-service | `sharingbridge-user-service/.env` | `npm start` (dotenv) |
+| user-service | `sharingbridge-user-service/.env` (export into shell) or IDE env | `dotnet run --project src/SharingBridge.UserService` |
 | web-app | `sharingbridge-web-app/.env` | `npm run dev` / **build** (`VITE_*` baked into `dist/`) |
 
 **Must match across services:** `DATABASE_URL` (Postgres), `AUTH_TOKEN_SECRET` (+ issuer/audience), `WEB_CORS_ORIGINS` (user-service **and** integration-service, same string), integration `API_BASE_URL` = web `VITE_API_BASE_URL` = mobile `API_BASE_URL`, web static site URL = mobile `WEB_DASHBOARD_URL`.
@@ -198,7 +198,7 @@ No `.env` file — pass at **`flutter run`** / **`flutter build apk --release`**
 | Define | Local example | Production (Render) |
 |--------|---------------|---------------------|
 | `API_BASE_URL` | `http://10.0.2.2:8080` (emulator) or `http://<PC-LAN-IP>:8080` (phone) | `https://<integration-host>.onrender.com` — **must match** web `VITE_API_BASE_URL` |
-| `AUTH_TOKEN` | dev only — pre-minted JWT (`node scripts/mint-dev-jwt.mjs` in user-service) | omit — use Google Sign-In |
+| `AUTH_TOKEN` | dev only — pre-minted JWT (`node legacy-node/scripts/mint-dev-jwt.mjs` in user-service) | omit — use Google Sign-In |
 | `GOOGLE_CLIENT_ID` | Android OAuth client ID from Google Cloud | same |
 | `HANDOVER_MAP_ENABLED` | `true` / `false` | **Map screen vs coordinate form** — pass `true` when you want the cab-style picker (recommended). Gradle may auto-add `true` when `GOOGLE_MAPS_API_KEY` is in `local.properties` and you omit this flag; explicit `true` is always correct for map builds. |
 | `PHOTO_SERVICE_BASE_URL` | `http://10.0.2.2:8092` or `http://<PC-LAN-IP>:8092` | `https://<photo-host>.onrender.com` |

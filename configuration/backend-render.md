@@ -11,7 +11,7 @@ Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Te
 | Layer | Repo | Runtime | Called by |
 |-------|------|---------|-----------|
 | **Experience** | `sharingbridge-integration-service` | Node 20 | mobile, web |
-| **System** | `sharingbridge-user-service` | Node 20 | integration only |
+| **System** | `sharingbridge-user-service` | **Docker (.NET 8 / C#)** | integration + web (Google auth) |
 | **Process** | `sharingbridge-ai-orchestration` | Docker | integration (`/internal/...`) |
 | **Process** | `sharingbridge-photo-service` | Docker | mobile (`PHOTO_SERVICE_BASE_URL`) |
 | **Process** | `sharingbridge-notification-service` | Node 20 | integration only (`CONNECTION_NOTIFY_WEBHOOK_URL`) |
@@ -41,8 +41,8 @@ Node services that use Postgres **require** `DATABASE_URL` at startup (no in-mem
 
 | Field | User-service | AI orchestration | Integration | Photo service | Notification service |
 |-------|--------------|------------------|-------------|---------------|----------------------|
-| Build Command | `npm install` | *(empty)* | `npm install` | *(empty — Docker)* | `npm install` |
-| Start Command | `npm start` | **blank** | `npm start` | **blank** | `npm start` |
+| Build Command | *(empty — Docker)* | *(empty)* | `npm install` | *(empty — Docker)* | `npm install` |
+| Start Command | **blank** | **blank** | `npm start` | **blank** | `npm start` |
 | Pre-Deploy Command | blank | blank | blank | blank | blank |
 | Health Check Path | `/health` | `/health` | `/health` | `/health` | `/health` |
 | Auto-Deploy | **On commit** to `main` | same | same | same | same |
@@ -160,12 +160,18 @@ Detail: [notification-service-local.md](./notification-service-local.md) · [mob
 
 ## Local `.env` (not used on Render)
 
-Both Node services (and notification-service) load a repo-root `.env` on `npm start` via `dotenv`.
+**user-service (C#)** does not auto-load `.env` — export variables into the shell / IDE, or use `USER_STORE=memory` without Postgres. Node services still use `dotenv` on `npm start`.
 
 ```powershell
 cd sharingbridge-user-service
-copy env.example .env
-# edit AUTH_TOKEN_SECRET, WEB_CORS_ORIGINS, …
+copy .env.example .env
+# edit AUTH_TOKEN_SECRET, WEB_CORS_ORIGINS, DATABASE_URL, GOOGLE_CLIENT_ID_WEB …
+# then export into the session (example):
+Get-Content .env | ForEach-Object {
+  if ($_ -match '^\s*#' -or $_ -notmatch '=') { return }
+  $k,$v = $_.Split('=',2); Set-Item -Path "Env:$k" -Value $v.Trim()
+}
+dotnet run --project src/SharingBridge.UserService
 
 cd ..\sharingbridge-integration-service
 copy env.example .env
@@ -178,7 +184,6 @@ copy env.example .env
 # same DATABASE_URL; WEBHOOK_SECRET matches integration CONNECTION_NOTIFY_WEBHOOK_SECRET
 # FIREBASE_SERVICE_ACCOUNT_PATH=.\firebase-adminsdk.json
 ```
-
 Web app: `sharingbridge-web-app/.env` from `env.example` (`VITE_*` URLs). Rebuild or restart `npm run dev` after changing `VITE_*`.
 
 Optional FCM stack: [notification-service-local.md](./notification-service-local.md).
@@ -216,7 +221,7 @@ Invoke-RestMethod "$PHO_URL/health"
 Invoke-RestMethod "$NOT_URL/health"
 
 # Authenticated smoke: mint JWT locally with the same AUTH_TOKEN_SECRET as Render user-service
-cd path\to\sharingbridge-user-service
+cd path\to\sharingbridge-user-service\legacy-node
 $env:AUTH_TOKEN_SECRET = "<same secret as Render user-service>"
 $token = node scripts/mint-dev-jwt.mjs demo-user initiator
 $h = @{ Authorization = "Bearer $token" }

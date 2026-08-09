@@ -11,7 +11,7 @@
 | [AGENT_SESSION.md](./AGENT_SESSION.md) | Agent session: next tasks, runbook, recent commits |
 | [database-setup-sequence.md](../configuration/database-setup-sequence.md) | SQL **1 → M1–M5** and **Where you are** on each environment |
 
-**Last updated:** July 2026
+**Last updated:** August 2026
 
 ---
 
@@ -56,13 +56,13 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 
 | Repo | Role | Status |
 |------|------|--------|
-| `sharingbridge-user-service` | Auth, presets, Postgres users | **Shipped** |
+| `sharingbridge-user-service` | Auth, presets, Postgres users (**C# / ASP.NET Core 8**; Node MVP in `legacy-node/`) | **Shipped** (C# cutover pending Render Docker deploy) |
 | `sharingbridge-integration-service` | Experience API / BFF | **Shipped** |
 | `sharingbridge-mobile-app` | Initiator Flutter app | **Shipped** |
 | `sharingbridge-web-app` | Coordinator + initiator (limited) dashboard | **Shipped** |
 | `sharingbridge-ai-orchestration` | suggest-vendors, instruction-pack | **Shipped** (deterministic + live) |
 | `sharingbridge-photo-service` | Reference photo upload | **Shipped** (no vision/embeddings) |
-| `sharingbridge-notification-service` | FCM on kitchen commit | **Shipped** |
+| `sharingbridge-notification-service` | FCM on kitchen commit | **Shipped** (Node) — **revise to Spring Boot** (same `/internal/connection-ready` contract) |
 | `sharingbridge-api-gateway`, `order-service`, `infra` | Scale path | **Not started** |
 | `sharingbridge-location-safety` | Geo scoring | **Archived** |
 
@@ -104,15 +104,18 @@ Detail: [database-setup-sequence.md](../configuration/database-setup-sequence.md
 
 ## Next priorities
 
-1. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
-2. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.
-3. **Mobile Connection panel** — in-app order-code lookup. **Shipped** (Order contacts on home + initiation detail).
-4. **Transactional email** in notification-service (Resend/SendGrid).
-5. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
-6. **UX redesign** — web hash routes shipped; mobile step wizards remain.
-7. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
-8. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
-9. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
+1. **Deploy C# user-service** on Render (Docker) — same env vars; smoke Google sign-in.
+2. **Revise notification-service to Spring Boot** — keep `POST /internal/connection-ready` + FCM contract; Docker on Render.
+3. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
+4. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.
+5. **Mobile Connection panel** — in-app order-code lookup. **Shipped** (Order contacts on home + initiation detail).
+6. **Transactional email** in notification-service (Resend/SendGrid) — prefer after Spring Boot rewrite.
+7. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
+8. **UX redesign** — web hash routes shipped; mobile step wizards remain.
+9. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
+10. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
+11. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
+12. **integration-service → Spring Boot** (larger cutover; after user + notification beachheads).
 
 Session backlog and commit log: [AGENT_SESSION.md](./AGENT_SESSION.md).
 
