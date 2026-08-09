@@ -68,12 +68,21 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | `AUTH_TOKEN_ISSUER` | `sharingbridge-user-service` | same |
 | `AUTH_TOKEN_SECRET` | shared secret | generated, same on integration + photo |
 | `AUTH_TOKEN_TTL_SECONDS` | `3600` | `3600` |
-| `DATABASE_URL` | `postgresql://…@localhost:5432/sharingbridge` | Supabase URI |
+| `DATABASE_URL` | `postgresql://…@localhost:5432/sharingbridge` | Supabase URI (session pooler `:5432` preferred for .NET) |
+| `DB_POOLING` | `true` | Client connection pooling on/off |
+| `DB_POOL_MIN` | `0` | Min pooled connections |
+| `DB_POOL_MAX` | `5` | Max pooled connections (keep modest on free tier) |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
+| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
+| `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query timeout |
+| `DB_REWRITE_SUPABASE_TRANSACTION_PORT` | `true` | Rewrite `*.pooler.supabase.com:6543` → `:5432` (session mode) |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries on Google sign-in path |
+| `DB_RETRY_BASE_DELAY_MS` | `200` | Base backoff for retries (`delay = base * attempt²`) |
 | `GOOGLE_CLIENT_ID_ANDROID` | Android OAuth client ID | when mobile uses Google |
 | `GOOGLE_CLIENT_ID_WEB` | Web OAuth client ID | same as `VITE_GOOGLE_CLIENT_ID` |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
 | `PORT` | `8081` | injected by Render — do not set |
-| `WEB_CORS_ORIGINS` | `http://localhost:5173` | `https://<static-site>.onrender.com` |
+| `WEB_CORS_ORIGINS` | `http://localhost:5173` | `https://sharingbridge.org,https://www.sharingbridge.org,…` |
 
 ---
 
