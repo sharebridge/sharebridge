@@ -268,7 +268,7 @@ See [mobile-client.md](./mobile-client.md) — mint JWT, then `flutter run` from
 | AI not used | `AI_ORCHESTRATION_BASE_URL`, `AI_*_ENABLED=true` |
 | Presets / intents lost on redeploy | Use **Supabase** + `DATABASE_URL` on user + integration (+ photo/notification as needed) — [database.md](./database.md) |
 | `DATABASE_URL` / connection errors | Prefer **session** pooler (`:5432`); run schema SQL; redeploy. Tune `DB_POOL_*` / `DB_RETRY_*` on user-service (roll out to other services next) |
-| Npgsql / .NET “Exception while reading from stream” | Usually transaction pooler `:6543` — switch to session `:5432` or leave `DB_SUPABASE_POOL_6543TRANS_5432SESSION=true` |
+| Npgsql / .NET “Exception while reading from stream” | Usually transaction pooler `:6543` — set `DB_SUPABASE_POOL_6543TRANS_5432SESSION=5432SESSION` (default) or use a session URI |
 | Browser **Failed to fetch** on web | `WEB_CORS_ORIGINS` on **user-service and integration-service** includes the web origin, **comma-separated** (not semicolons); web `.env` `VITE_*` must point at the same API hosts you use for mobile |
 | Google `Error 400: origin_mismatch` | Web OAuth client → Authorized JavaScript origins must list the **exact** origin in the address bar — apex and `www.` are separate entries |
 | Service exits with `(ENOTFOUND) tenant/user postgres.<ref> not found` | **Supabase free-tier project paused** after inactivity — Supabase dashboard → **Restore/Resume project**, then redeploy; also confirm `DATABASE_URL` still matches Connect → pooler string |
