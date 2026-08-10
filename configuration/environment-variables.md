@@ -107,7 +107,7 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 | `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
 | `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query timeout |
-| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | On `*.pooler.supabase.com`, force pooler port: **`5432`** (session, default, Npgsql-safe) or **`6543`** (transaction). |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | On `*.pooler.supabase.com`, force pooler port: **`5432`** (session, default when unset) or **`6543`** (transaction). Any other value fails startup. |
 | `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries on Google sign-in path |
 | `DB_RETRY_BASE_DELAY_MS` | `200` | Base backoff for retries (`delay = base * attempt²`) |
 | `GOOGLE_CLIENT_ID_ANDROID` | Android OAuth client ID | when mobile uses Google |
