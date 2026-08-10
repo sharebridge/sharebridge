@@ -179,10 +179,16 @@ Skip until Phase 1 mobile testing: **Credentials** → **+ Create credentials** 
 
 ```powershell
 cd sharingbridge-user-service
-copy env.example .env
+copy .env.example .env
+# Edit keys, then export into the shell (C# does not auto-load .env):
+Get-Content .env | ForEach-Object {
+  if ($_ -match '^\s*#' -or $_ -notmatch '=') { return }
+  $k,$v = $_.Split('=',2); Set-Item -Path "Env:$k" -Value $v.Trim()
+}
+dotnet run --project src/SharingBridge.UserService
 ```
 
-Set keys from [environment-variables.md](./environment-variables.md) (**Local example** column). Use Phase 0 Web Client ID for `GOOGLE_CLIENT_ID_WEB` and `VITE_GOOGLE_CLIENT_ID`.
+Set keys from [environment-variables.md](./environment-variables.md) § **sharingbridge-user-service** (**Local example** column). Use Phase 0 Web Client ID for `GOOGLE_CLIENT_ID_WEB` and `VITE_GOOGLE_CLIENT_ID`. Prefer Supabase **session** pooler (`:5432`) for `DATABASE_URL`.
 
 Coordinator role: Postgres `user_roles` — [coordinator-seed.sql](./coordinator-seed.sql) · [google-auth-setup.md](./google-auth-setup.md) Part 3.  
 Database SQL order: [database-setup-sequence.md](./database-setup-sequence.md).
@@ -207,7 +213,7 @@ Same env index § web-app: [environment-variables.md](./environment-variables.md
 
 ### 1.4 Run and verify
 
-1. Start user-service (`npm start`, port 8081).
+1. Start user-service (`dotnet run --project src/SharingBridge.UserService`, port 8081) with env exported from `.env`.
 2. Start integration-service (`npm start`, port 8080).
 3. `npm run dev` in web-app → http://localhost:5173.
 4. **Sign in with Google** using a Gmail with `coordinator` in `user_roles`.
@@ -233,11 +239,11 @@ Same env index § web-app: [environment-variables.md](./environment-variables.md
 
 If a step was skipped: [database-setup-sequence.md](./database-setup-sequence.md) § **If a step was skipped**.
 
-**Supabase (Render):** create project → SQL Editor → **1a + 1** → copy database URI → `DATABASE_URL` on both Node services → redeploy.
+**Supabase (Render):** create project → SQL Editor → **1a + 1** → copy database URI (prefer **session** pooler `:5432` for user-service) → `DATABASE_URL` on user-service, integration-service, photo-service, notification-service → redeploy.
 
 Deploy in order — [backend-render.md](./backend-render.md). Each repo’s **`render.yaml`** enables **auto-deploy on push to `main`** when connected via Render Blueprint (or enable **On Commit** in the dashboard).
 
-1. **user-service** (Web Service, Node 20).
+1. **user-service** (Web Service, **Docker / .NET 8** — clear any leftover `npm` build/start).
 2. **ai-orchestration** (Docker) — if integration uses AI paths.
 3. **integration-service** (Web Service, Node 20).
 4. **photo-service** (Docker) — reference photo upload from mobile.

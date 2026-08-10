@@ -11,7 +11,7 @@
 | Engineering phases E–K | [ENGINEERING_PLAN.md](../development/ENGINEERING_PLAN.md) § Marketplace phases |
 | Producer supply, recipe BOM, UOM | [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md) § Producer supply & recipe BOM |
 | SQL run order | [database-setup-sequence.md](../configuration/database-setup-sequence.md) |
-| Stack today | [Technical Architecture § As-built](./SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026) |
+| Stack today | [Technical Architecture § As-built](./SharingBridge_Technical_Architecture.md#as-built-architecture-august-2026) |
 
 ---
 

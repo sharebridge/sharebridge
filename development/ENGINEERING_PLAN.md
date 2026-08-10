@@ -4,7 +4,7 @@
 **Date:** July 2026  
 **Status:** Long-term engineering plan (free-tier MVP + production scale track).
 
-> **As-built truth:** [STATUS.md](./STATUS.md) and [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026).  
+> **As-built truth:** [STATUS.md](./STATUS.md) and [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-august-2026).  
 > This file may still mention NestJS, Next.js, React Native, Kong, order-service, or “photo not wired” — treat those as **aspirational / scale** unless STATUS says shipped.  
 > **Update STATUS, not this file**, when milestones land.
 
@@ -58,6 +58,8 @@ Develop and test all SharingBridge components using free-tier platforms with nea
 | **API Gateway** | Self-hosted Kong (Docker) | Manual setup | Keep or move to AWS |
 
 **How this relates to code today:** The table below describes the **target free-tier stack**. As-built status: [STATUS.md](./STATUS.md). SQL order: [database-setup-sequence.md](../configuration/database-setup-sequence.md).
+
+**Language beachheads (in progress):** user-service is **ASP.NET Core 8**; notification-service → **Spring Boot** next; integration later. Shared Postgres client knobs (`DB_POOL_*` / `DB_RETRY_*`) shipped on user-service — apply the same names when rewriting or hardening other services ([env standard](../configuration/environment-variables.md#database-client-pool--retry-standard)).
 
 ---
 

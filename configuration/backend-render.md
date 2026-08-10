@@ -6,7 +6,7 @@ Host **Web Services** for Track A. Credentials: [authentication.md](./authentica
 
 **Mobile and web call only `sharingbridge-integration-service`** (`API_BASE_URL` / `VITE_API_BASE_URL`). That service is the **Experience API** (shared BFF): it validates JWT, applies CORS, proxies presets to user-service, bridges AI to ai-orchestration, and owns order-intent data in Postgres. Internal services are not browser- or app-facing.
 
-Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026).
+Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-august-2026).
 
 | Layer | Repo | Runtime | Called by |
 |-------|------|---------|-----------|
@@ -14,7 +14,7 @@ Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Te
 | **System** | `sharingbridge-user-service` | **Docker (.NET 8 / C#)** | integration + web (Google auth) |
 | **Process** | `sharingbridge-ai-orchestration` | Docker | integration (`/internal/...`) |
 | **Process** | `sharingbridge-photo-service` | Docker | mobile (`PHOTO_SERVICE_BASE_URL`) |
-| **Process** | `sharingbridge-notification-service` | Node 20 | integration only (`CONNECTION_NOTIFY_WEBHOOK_URL`) |
+| **Process** | `sharingbridge-notification-service` | Node 20 → **Spring Boot** next | integration only (`CONNECTION_NOTIFY_WEBHOOK_URL`) |
 | **Client** | `sharingbridge-web-app` | **Static Site** | coordinator browser |
 
 **Not on Render for MVP:** `sharingbridge-location-safety` (archived), api-gateway, order-service.
@@ -23,7 +23,7 @@ Each repo has a root **`render.yaml`** blueprint. Connect via **New + → Bluepr
 
 **Do not use:** Static Site, Private Service, Worker, Cron, Key Value (for MVP app data).
 
-**Database:** use **[Supabase](https://supabase.com)** (hosted Postgres) for tables and data. Render hosts **APIs only** — set **`DATABASE_URL`** on **user-service, integration-service, photo-service, and notification-service** to your Supabase connection URI. Full steps: [database.md](./database.md) (create tables in Supabase **SQL Editor**, then wire Render). SQL order: [database-setup-sequence.md](./database-setup-sequence.md) (include M4 eco-kitchen + M5 `device_tokens` for connection push).
+**Database:** use **[Supabase](https://supabase.com)** (hosted Postgres) for tables and data. Render hosts **APIs only** — set **`DATABASE_URL`** on **user-service, integration-service, photo-service, and notification-service** to your Supabase connection URI. For **user-service (C# / Npgsql)** prefer the **session** pooler (`:5432`); transaction mode (`:6543`) caused read timeouts. Optional client knobs: `DB_POOL_*` / `DB_RETRY_*` (shipped on user-service; roll out to other services next) — [environment-variables.md § Database client pool & retry](./environment-variables.md#database-client-pool--retry-standard). Full steps: [database.md](./database.md). SQL order: [database-setup-sequence.md](./database-setup-sequence.md) (include M4 eco-kitchen + M5 `device_tokens` for connection push).
 
 Node services that use Postgres **require** `DATABASE_URL` at startup (no in-memory marketplace fallback). Without it, deploy fails or marketplace / device-token routes return 503. See [database.md](./database.md).
 
@@ -221,9 +221,9 @@ Invoke-RestMethod "$PHO_URL/health"
 Invoke-RestMethod "$NOT_URL/health"
 
 # Authenticated smoke: mint JWT locally with the same AUTH_TOKEN_SECRET as Render user-service
-cd path\to\sharingbridge-user-service\legacy-node
+cd path\to\sharingbridge-user-service
 $env:AUTH_TOKEN_SECRET = "<same secret as Render user-service>"
-$token = node scripts/mint-dev-jwt.mjs demo-user initiator
+$token = (dotnet run --project tools/MintDevJwt -v q -- demo-user initiator | Select-Object -Last 1)
 $h = @{ Authorization = "Bearer $token" }
 
 Invoke-RestMethod -Method POST -Uri "$INT_URL/v1/donor-setup/suggest-vendors" `
@@ -266,9 +266,10 @@ See [mobile-client.md](./mobile-client.md) — mint JWT, then `flutter run` from
 | `403` / invalid JWT | Match `AUTH_TOKEN_SECRET` |
 | `401 Invalid internal API key` | Match `AI_ORCHESTRATION_INTERNAL_API_KEY` |
 | AI not used | `AI_ORCHESTRATION_BASE_URL`, `AI_*_ENABLED=true` |
-| Presets / intents lost on redeploy | Use **Supabase** + `DATABASE_URL` on both Node services — [database.md](./database.md) |
-| `DATABASE_URL` / connection errors | Use **internal** URL; run schema SQL; redeploy both services |
-| Browser **Failed to fetch** on web | `WEB_CORS_ORIGINS` on **both** backends includes the web origin, **comma-separated** (not semicolons); web `.env` `VITE_*` must point at the same API hosts you use for mobile |
+| Presets / intents lost on redeploy | Use **Supabase** + `DATABASE_URL` on user + integration (+ photo/notification as needed) — [database.md](./database.md) |
+| `DATABASE_URL` / connection errors | Prefer **session** pooler (`:5432`); run schema SQL; redeploy. Tune `DB_POOL_*` / `DB_RETRY_*` on user-service (roll out to other services next) |
+| Npgsql / .NET “Exception while reading from stream” | Usually transaction pooler `:6543` — switch to session `:5432` or leave `DB_REWRITE_SUPABASE_TRANSACTION_PORT=true` |
+| Browser **Failed to fetch** on web | `WEB_CORS_ORIGINS` on **user-service and integration-service** includes the web origin, **comma-separated** (not semicolons); web `.env` `VITE_*` must point at the same API hosts you use for mobile |
 | Google `Error 400: origin_mismatch` | Web OAuth client → Authorized JavaScript origins must list the **exact** origin in the address bar — apex and `www.` are separate entries |
 | Service exits with `(ENOTFOUND) tenant/user postgres.<ref> not found` | **Supabase free-tier project paused** after inactivity — Supabase dashboard → **Restore/Resume project**, then redeploy; also confirm `DATABASE_URL` still matches Connect → pooler string |
 | Local env ignored | Copy `env.example` → `.env` in each Node repo; restart `npm start` |

@@ -16,13 +16,13 @@ SharingBridge helps people **arrange meals** — for themselves, family, seniors
 
 ```text
 Flutter mobile ──┐
-                 ├──► integration-service (Experience API / BFF)
+                 ├──► integration-service (Experience API / BFF · Node → Spring later)
 Vite/React web ──┘           │
-                               ├──► user-service → Postgres (auth, presets)
+                               ├──► user-service (C# / ASP.NET) → Postgres (auth, presets; DB_POOL_* / DB_RETRY_*)
                                ├──► ai-orchestration → Groq / Gemini
-                               ├──► photo-service → Cloudinary
-                               ├──► notification-service → FCM
-                               └──► Postgres / PostGIS (order intents, marketplace)
+                               ├──► photo-service → Cloudinary (+ shared DB_* next)
+                               ├──► notification-service → FCM (Node → Spring Boot; DB_* in rewrite)
+                               └──► Postgres / PostGIS (order intents, marketplace; prefer session pooler)
                                          ↓
                               Vendor deep links (payment off-platform)
 ```
@@ -31,15 +31,15 @@ Vite/React web ──┘           │
 |-------|------|-------------|
 | Mobile | Flutter | One app for Android field flows |
 | Web | Vite + React | Static dashboard on Render |
-| Experience API | Node 20 HTTP | Small BFF; fast free-tier deploys |
-| Auth | **C#** user-service + Google JWT | Identity separate from journeys; ASP.NET Core on Render Docker |
-| Notifications | Node today → **Spring Boot** next | Keep FCM webhook; rewrite when capacity allows |
+| Experience API | Node 20 HTTP → Spring Boot later | Small BFF; fast free-tier deploys |
+| Auth | **C#** user-service + Google JWT | Identity separate from journeys; ASP.NET Core on Render Docker; env `DB_POOL_*` / `DB_RETRY_*` |
+| Notifications | Node today → **Spring Boot** next | Keep FCM webhook; same DB access env standard when rewritten |
 | AI | FastAPI + Groq/Gemini | Live enrichment required; fail closed if LLM down; prompts include content-safety rules |
 | Photos | Cloudinary | Managed uploads without our own object store |
-| Data | Supabase Postgres + PostGIS | Geo neighbourhood feeds |
+| Data | Supabase Postgres + PostGIS | Geo neighbourhood feeds; shared `DB_*` client knobs |
 | Host | Render + `sharingbridge.org` | Low-cost Git-linked hosting |
 
-**Full stack + rationale:** [Technical Architecture § As-built](design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026).
+**Full stack + rationale:** [Technical Architecture § As-built](design/SharingBridge_Technical_Architecture.md#as-built-architecture-august-2026).
 
 ## Repositories (shipped)
 
@@ -49,7 +49,7 @@ Vite/React web ──┘           │
 | `sharingbridge-mobile-app` | Flutter initiator app |
 | `sharingbridge-web-app` | Vite + React dashboard |
 | `sharingbridge-integration-service` | Experience API / BFF |
-| `sharingbridge-user-service` | Auth + vendor presets (**ASP.NET Core / C#**; Node under `legacy-node/`) |
+| `sharingbridge-user-service` | Auth + vendor presets (**ASP.NET Core / C#**; `DB_POOL_*` / `DB_RETRY_*`) |
 | `sharingbridge-ai-orchestration` | LLM pipelines |
 | `sharingbridge-photo-service` | Photo upload |
 | `sharingbridge-notification-service` | FCM on kitchen commit (**Node today**; planned rewrite to **Spring Boot**) |
@@ -65,7 +65,7 @@ When docs disagree, **higher row wins**.
 | 1 | [BRD](requirements/SharingBridge_Business_Requirement.md) | Operating constraints |
 | 2 | [PRODUCT_MODEL.md](development/PRODUCT_MODEL.md) | Vocabulary, actors, routes |
 | 3 | [Eco_Kitchen_Initiation_Flow.md](design/Eco_Kitchen_Initiation_Flow.md) | Three initiation routes |
-| 4 | [Technical Architecture § As-built](design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026) | Stack & services **today** |
+| 4 | [Technical Architecture § As-built](design/SharingBridge_Technical_Architecture.md#as-built-architecture-august-2026) | Stack & services **today** |
 | 5 | [STATUS.md](development/STATUS.md) | Shipped vs plan |
 | 6 | [configuration/](configuration/) | Run, deploy, env, SQL |
 | 7 | [ENGINEERING_PLAN.md](development/ENGINEERING_PLAN.md) | Long-term / scale plan (aspirational) |

@@ -376,7 +376,7 @@ Mint a signed token (same `AUTH_TOKEN_SECRET` as user-service `.env`):
 
 ```powershell
 cd D:\kannan\sharingbridge\sharingbridge-user-service
-$token = node scripts/mint-dev-jwt.mjs alice initiator
+$token = dotnet run --project tools/MintDevJwt -v q -- alice initiator
 $headers = @{ Authorization = "Bearer $token" }
 ```
 
@@ -491,7 +491,7 @@ try {
 ### 2g. Verify per-user isolation
 
 ```powershell
-$bobToken = node scripts/mint-dev-jwt.mjs bob initiator
+$bobToken = dotnet run --project tools/MintDevJwt -v q -- bob initiator
 $bobHeaders = @{ Authorization = "Bearer $bobToken" }
 $bobBody = @{
   presets = @(
@@ -697,11 +697,11 @@ Replace `emulator-5554` with your `flutter devices` id.
 
 ### 3-dev. Dev token path (fallback, no Google)
 
-Mint on the **PC** with user-service `scripts/mint-dev-jwt.mjs` (same `AUTH_TOKEN_SECRET` as `.env`). The app still uses **`10.0.2.2`** to reach backends from the emulator.
+Mint on the **PC** with user-service `tools/MintDevJwt` (same `AUTH_TOKEN_SECRET` as `.env`). The app still uses **`10.0.2.2`** to reach backends from the emulator.
 
 ```powershell
 cd D:\kannan\sharingbridge\sharingbridge-user-service
-$mobileToken = node scripts/mint-dev-jwt.mjs alice initiator
+$mobileToken = dotnet run --project tools/MintDevJwt -v q -- alice initiator
 
 cd D:\kannan\sharingbridge\sharingbridge-mobile-app
 flutter run -d emulator-5554 `
@@ -763,7 +763,7 @@ Pick one approach:
    Or **replace with an empty list** via API:
 
    ```powershell
-   $token = node scripts/mint-dev-jwt.mjs alice initiator
+   $token = dotnet run --project tools/MintDevJwt -v q -- alice initiator
    $uid = "alice"
    Invoke-RestMethod -Method Put -Uri "http://localhost:8081/v1/users/$uid/donor-presets" `
      -Headers @{ Authorization = "Bearer $token" } -ContentType "application/json" `
@@ -997,7 +997,7 @@ Earlier MVP builds stored a field draft under `sharingbridge_field_interaction_d
 Use this after deploying per **[configuration/backend-render.md](../configuration/backend-render.md)**.
 
 1. Confirm `/health` on user-service, integration-service, photo-service, and notification-service return `ok: true` (allow 30–60s on cold start).
-2. Mint a token locally: `node scripts/mint-dev-jwt.mjs demo-user initiator` in user-service (with hosted `AUTH_TOKEN_SECRET` in env if backfilling Render data).
+2. Mint a token locally: `dotnet run --project tools/MintDevJwt -v q -- demo-user initiator` in user-service (with hosted `AUTH_TOKEN_SECRET` in env if backfilling Render data).
 3. Call **hosted** integration `POST …/v1/donor-setup/suggest-vendors` and `POST …/v1/donor-seeker/instruction-pack` with `Authorization: Bearer <token>`.
 4. `POST …/v1/donor-seeker/order-intents` with the same Bearer token (see [configuration/backend-render.md](../configuration/backend-render.md) smoke script). First call returns HTTP **201** and `created: true`. Repeat the **same** `pack_id` — expect HTTP **200**, `created: false`, and the **same** `order_intent_id`.
 5. Run the mobile app — debug: `flutter run` ([mobile-client.md](../configuration/mobile-client.md)); hosted sideload: **§3-build** release APK. Walk **§3f**, eco kitchen routes, **§4f** Connection, and **§4g** FCM after kitchen commit.

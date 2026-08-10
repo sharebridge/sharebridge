@@ -86,7 +86,7 @@ integration-service reads `role` from the JWT. JWT `role` `donor` is treated as 
 
 **Sign in without Google (local only)**
 
-**Dev-only JWT** (scripts, mobile `--dart-define=AUTH_TOKEN`): sign locally with the same `AUTH_TOKEN_SECRET` — `node scripts/mint-dev-jwt.mjs <user_id> [initiator|coordinator]` in user-service. Legacy `donor` is accepted and normalized to `initiator`. There is no HTTP “mint token without Google” endpoint.
+**Dev-only JWT** (scripts, mobile `--dart-define=AUTH_TOKEN`): sign locally with the same `AUTH_TOKEN_SECRET` — `dotnet run --project tools/MintDevJwt -- <user_id> [initiator|coordinator]` in user-service. Legacy `donor` is accepted and normalized to `initiator`. There is no HTTP “mint token without Google” endpoint.
 
 ---
 

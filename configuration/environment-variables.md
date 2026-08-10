@@ -55,12 +55,44 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | `AUTH_TOKEN_AUDIENCE` | user-service, integration-service, photo-service | `sharingbridge-clients` |
 | `AUTH_TOKEN_ISSUER` | same | `sharingbridge-user-service` |
 | `AUTH_TOKEN_SECRET` | same | HS256 JWT signing — **same value** on all three |
-| `DATABASE_URL` | same | Postgres (Supabase in prod) |
+| `DATABASE_URL` | same | Postgres (Supabase in prod). For **long-lived** API processes prefer **session** pooler (`*.pooler.supabase.com:5432`). Transaction mode (`:6543`) suits serverless; Npgsql/.NET hung on `:6543` — see [Database client pool & retry](#database-client-pool--retry-standard). |
 | `WEB_CORS_ORIGINS` | user-service, integration-service | Browser origin(s) of the dashboard, **comma-separated** (never semicolons), e.g. `http://localhost:5173` — **not** the API URL. Production includes custom domains: `https://sharingbridge.org,https://www.sharingbridge.org,https://<static-site>.onrender.com` |
 
 ---
 
+## Database client pool & retry (standard)
+
+**Shipped first on** `sharingbridge-user-service` (C# / Npgsql). **Apply the same env contract** when hardening or rewriting other Postgres clients (`integration-service`, `photo-service`, `notification-service`).
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `DB_POOLING` | `true` | Client-side connection pooling on/off |
+| `DB_POOL_MIN` | `0` | Min pooled connections |
+| `DB_POOL_MAX` | `5` | Max pooled connections (keep modest on free tier) |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
+| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
+| `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query / command timeout |
+| `DB_REWRITE_SUPABASE_TRANSACTION_PORT` | `true` | (.NET) Rewrite `*.pooler.supabase.com:6543` → `:5432` |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries (timeouts / stream errors) |
+| `DB_RETRY_BASE_DELAY_MS` | `200` | Backoff base (`delay ≈ base × attempt²`) |
+
+**Rollout:**
+
+| Service | Today | Next step |
+|---------|--------|-----------|
+| user-service (C#) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
+| integration-service (Node `pg`) | Pool defaults inside `pg.Pool`; no shared `DB_*` knobs | Add the same env names when next touching DB bootstrap |
+| photo-service (Python) | App-specific | Align naming when next DB hardening pass |
+| notification-service | Node today → Spring Boot | Adopt `DB_*` in the Spring rewrite |
+
+Do **not** put passwords or full URIs in these knobs — only pool/retry behaviour. Connection identity stays in `DATABASE_URL`.
+
+---
+
 ## `sharingbridge-user-service`
+
+**Template:** `sharingbridge-user-service/.env.example` → copy to `.env`.  
+**Run:** export vars into the shell / IDE, then `dotnet run --project src/SharingBridge.UserService` (ASP.NET does not load `.env` automatically — [backend-render.md § Local .env](./backend-render.md#local-env-not-used-on-render)).
 
 | Variable | Local example | Render production |
 |----------|---------------|-------------------|
@@ -106,7 +138,8 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | `AUTH_TOKEN_SECRET` | **same** as user-service | same |
 | `CONNECTION_NOTIFY_WEBHOOK_SECRET` | *(unset)* | Shared secret sent as `X-Webhook-Secret` — must match notification-service `WEBHOOK_SECRET` |
 | `CONNECTION_NOTIFY_WEBHOOK_URL` | *(unset)* | Optional — POST JSON when eco kitchen commits (`connection_ready`); for notification-service or mailer |
-| `DATABASE_URL` | **same** as user-service | same |
+| `DATABASE_URL` | **same** as user-service | same — prefer Supabase **session** pooler (`:5432`) for this long-lived Node process |
+| `DB_POOL_*` / `DB_RETRY_*` | *(not wired yet)* | **Planned** — adopt the [shared standard](#database-client-pool--retry-standard) when next hardening `pg` bootstrap (same names as user-service) |
 | `INITIATOR_NEIGHBOURHOOD_RADIUS_M` | `5000` | `5000` (`near_lat` / `near_lng` filter radius in **metres**; capped at 50000 server-side) |
 | `INITIATOR_NEIGHBOURHOOD_WINDOW_HOURS` | `2` | `2` (initiator list `since`, photo redaction; 1–72) |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
@@ -125,6 +158,7 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | Variable | Local example | Render production |
 |----------|---------------|-------------------|
 | `DATABASE_URL` | **same** as integration-service | same — reads `device_tokens` |
+| `DB_POOL_*` / `DB_RETRY_*` | *(not wired yet)* | **Planned** — adopt in the **Spring Boot** rewrite ([shared standard](#database-client-pool--retry-standard)) |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | *(optional locally if using PATH)* | **Preferred on Render** — paste full Admin SDK JSON from Firebase Console (see below) |
 | `FIREBASE_SERVICE_ACCOUNT_PATH` | `.\firebase-adminsdk.json` | **Do not use on Render** — local `.env` only; path to downloaded Admin SDK key file |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
@@ -155,7 +189,8 @@ Webhook route: `POST /internal/connection-ready` — set integration `CONNECTION
 | `CLOUDINARY_API_SECRET` | | required |
 | `CLOUDINARY_CLOUD_NAME` | | required |
 | `CLOUDINARY_URL` | optional alternative to the three keys above | `cloudinary://…` |
-| `DATABASE_URL` | same Postgres | same |
+| `DATABASE_URL` | same Postgres | same — prefer session pooler (`:5432`) |
+| `DB_POOL_*` / `DB_RETRY_*` | *(not wired yet)* | **Planned** — align Python DB client with the [shared standard](#database-client-pool--retry-standard) |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
 
 See [photo-service-local.md](./photo-service-local.md).
@@ -207,7 +242,7 @@ No `.env` file — pass at **`flutter run`** / **`flutter build apk --release`**
 | Define | Local example | Production (Render) |
 |--------|---------------|---------------------|
 | `API_BASE_URL` | `http://10.0.2.2:8080` (emulator) or `http://<PC-LAN-IP>:8080` (phone) | `https://<integration-host>.onrender.com` — **must match** web `VITE_API_BASE_URL` |
-| `AUTH_TOKEN` | dev only — pre-minted JWT (`node legacy-node/scripts/mint-dev-jwt.mjs` in user-service) | omit — use Google Sign-In |
+| `AUTH_TOKEN` | dev only — pre-minted JWT (`dotnet run --project tools/MintDevJwt -- <user_id> [role]` in user-service) | omit — use Google Sign-In |
 | `GOOGLE_CLIENT_ID` | Android OAuth client ID from Google Cloud | same |
 | `HANDOVER_MAP_ENABLED` | `true` / `false` | **Map screen vs coordinate form** — pass `true` when you want the cab-style picker (recommended). Gradle may auto-add `true` when `GOOGLE_MAPS_API_KEY` is in `local.properties` and you omit this flag; explicit `true` is always correct for map builds. |
 | `PHOTO_SERVICE_BASE_URL` | `http://10.0.2.2:8092` or `http://<PC-LAN-IP>:8092` | `https://<photo-host>.onrender.com` |
@@ -242,7 +277,7 @@ Google sign-in on web works for any account with `donor`/`initiator` and/or `coo
 | mobile-app | `API_BASE_URL`, `USER_SERVICE_BASE_URL`, `PHOTO_SERVICE_BASE_URL`, `GOOGLE_CLIENT_ID`, `WEB_DASHBOARD_URL=http://10.0.2.2:5173` (emulator) — all via `--dart-define` on `flutter run` |
 | notification-service | `DATABASE_URL`, `WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT_PATH` or `FIREBASE_SERVICE_ACCOUNT_JSON` — [notification-service-local.md](./notification-service-local.md) |
 | photo-service | `AUTH_TOKEN_SECRET`, `CLOUDINARY_*`, `DATABASE_URL` |
-| user-service | `AUTH_TOKEN_SECRET`, `DATABASE_URL`, `GOOGLE_CLIENT_ID_WEB`, `WEB_CORS_ORIGINS=http://localhost:5173` |
+| user-service | `AUTH_TOKEN_SECRET`, `DATABASE_URL` (session pooler `:5432`), `GOOGLE_CLIENT_ID_WEB`, `WEB_CORS_ORIGINS=http://localhost:5173` — from `.env.example`; optional `DB_POOL_*` / `DB_RETRY_*` |
 | web-app | `VITE_API_BASE_URL`, `VITE_GOOGLE_CLIENT_ID`, `VITE_USER_SERVICE_BASE_URL` → localhost ports above |
 
-Restart Node after `.env` changes. Restart `npm run dev` after web `VITE_*` changes. Rebuild mobile after any `--dart-define` change.
+Restart Node after `.env` changes. Re-export user-service env after `.env` edits. Restart `npm run dev` after web `VITE_*` changes. Rebuild mobile after any `--dart-define` change.

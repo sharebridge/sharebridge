@@ -2,7 +2,7 @@
 
 **Project:** SharingBridge — community meal coordination platform  
 **Status:** As-built MVP is authoritative below. Sections **1–10** are a longer **scale / target** reference and may name NestJS, Kong, EKS, etc. — those are **not** the Render MVP unless repeated in As-built.  
-**Last aligned:** July 2026
+**Last aligned:** August 2026
 
 ---
 
@@ -11,17 +11,17 @@
 Product constraints: [SharingBridge_Business_Requirement.md](../requirements/SharingBridge_Business_Requirement.md) § Operating Constraints.  
 Product language: [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md). Progress: [STATUS.md](../development/STATUS.md).
 
-**MVP choices (shipped):** Flutter mobile · Vite + React web · Node 20 HTTP services (not NestJS) · FastAPI for AI/photo · Postgres on Supabase · Render hosting.
+**MVP choices (shipped):** Flutter mobile · Vite + React web · **ASP.NET Core 8 (C#)** user-service · Node 20 Experience API + notification-service (Spring Boot planned) · FastAPI for AI/photo · Postgres on Supabase · Render hosting.
 
 ---
 
-## As-built architecture (July 2026)
+## As-built architecture (August 2026)
 
 What is **running in code and on Render today**. This section wins over conflicting names elsewhere in this file.
 
 ### In one paragraph
 
-Mobile (Flutter) and web (Vite/React) talk to one **Experience API** (`integration-service`). That service validates JWTs, owns order intents / marketplace workflow state, and calls other services when needed: **user-service** (auth + presets), **ai-orchestration** (vendor suggestions + delivery instructions via Groq/Gemini), **photo-service** (Cloudinary uploads), and **notification-service** (FCM after kitchen commit). Postgres on Supabase is the system of record. Payments never enter SharingBridge — clients deep-link into vendor apps.
+Mobile (Flutter) and web (Vite/React) talk to one **Experience API** (`integration-service`). That service validates JWTs, owns order intents / marketplace workflow state, and calls other services when needed: **user-service** (auth + presets, **C# / ASP.NET Core 8**), **ai-orchestration** (vendor suggestions + delivery instructions via Groq/Gemini), **photo-service** (Cloudinary uploads), and **notification-service** (FCM after kitchen commit). Postgres on Supabase is the system of record. Payments never enter SharingBridge — clients deep-link into vendor apps.
 
 ### Request flow
 
@@ -39,11 +39,11 @@ flowchart TB
   subgraph process["Process"]
     AI["ai-orchestration :8091\nFastAPI · Groq / Gemini"]
     PHO["photo-service :8092\nFastAPI · Cloudinary"]
-    NOT["notification-service :8093\nFCM"]
+    NOT["notification-service :8093\nFCM · Spring Boot planned"]
   end
 
   subgraph system["System of record"]
-    USR["user-service :8081\nJWT · presets"]
+    USR["user-service :8081\nASP.NET Core · JWT · presets"]
     PG[(Postgres / Supabase)]
   end
 
@@ -68,12 +68,12 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 |-------|---------|------------|
 | Clients | `sharingbridge-mobile-app` | Initiator flows: presets, Help a seeker, eco kitchen, handover map |
 | Clients | `sharingbridge-web-app` | Dashboard: Initiations, Actions, Map, Connection, Help → GitHub README |
-| Experience | `sharingbridge-integration-service` | Journey APIs, order intents, demand board, geocode reverse, CORS |
-| System | `sharingbridge-user-service` | Google OAuth → JWT, vendor presets (`donor_presets`) |
+| Experience | `sharingbridge-integration-service` | Journey APIs, order intents, demand board, geocode reverse, CORS (Node; Spring Boot later) |
+| System | `sharingbridge-user-service` | Google OAuth → JWT, vendor presets (`donor_presets`) — **ASP.NET Core 8**; env `DB_POOL_*` / `DB_RETRY_*` |
 | Process | `sharingbridge-ai-orchestration` | Suggest vendors + instruction-pack (Groq text, Gemini vision) |
-| Process | `sharingbridge-photo-service` | Reference photo upload (Cloudinary); **not** face-match |
-| Process | `sharingbridge-notification-service` | FCM push on kitchen commit (wire per env) |
-| Data | Supabase Postgres + PostGIS | Users, intents, marketplace tables, device tokens |
+| Process | `sharingbridge-photo-service` | Reference photo upload (Cloudinary); **not** face-match — adopt shared `DB_*` next |
+| Process | `sharingbridge-notification-service` | FCM push on kitchen commit (Node today → **Spring Boot**; adopt `DB_*`) |
+| Data | Supabase Postgres + PostGIS | Users, intents, marketplace tables, device tokens; prefer **session** pooler (`:5432`) for long-lived APIs |
 
 **Not built for MVP:** `api-gateway`, `order-service`, `infra`. **Archived:** `location-safety`.
 
@@ -83,12 +83,12 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 |--------|-------------|-----|
 | **Mobile** | Flutter | One codebase for Android (primary) and iOS later; strong offline-friendly UI for field “Help a seeker” flows |
 | **Web** | Vite + React | Fast static dashboard on Render; no SSR needed for a signed-in ops UI |
-| **Experience API** | Node 20 + `node:http` (not NestJS) | Small surface, quick to deploy on free-tier Render; enough structure without Nest ceremony |
-| **Auth / presets** | Separate `user-service` + JWT HS256 | Clear boundary: identity and presets vs journey workflow state |
+| **Experience API** | Node 20 + `node:http` (Spring Boot later) | Small surface for MVP; Spring Boot planned after notification beachhead |
+| **Auth / presets** | **ASP.NET Core 8** user-service + JWT HS256 | Identity beachhead in C#; same HTTP contracts as the prior Node MVP |
 | **AI process** | Python FastAPI + direct Groq/Gemini HTTP (no LangChain) | Live mode required; fail closed if LLM down; content-safety rules in system prompts; reject unsafe user text before calling models |
 | **Photos** | FastAPI + Cloudinary | Managed image CDN/upload without running our own object store on free tier |
-| **Push** | Firebase Cloud Messaging via notification-service | Standard Android push path for connection-ready alerts |
-| **Database** | Postgres on Supabase (+ PostGIS) | Relational + geo queries (`ST_DWithin`) for neighbourhood feeds; managed free tier |
+| **Push** | FCM via notification-service (Node → Spring Boot) | Standard Android push; Spring rewrite keeps `/internal/connection-ready` |
+| **Database** | Postgres on Supabase (+ PostGIS); shared `DB_POOL_*` / `DB_RETRY_*` | Relational + geo; session pooler for long-lived APIs; client knobs shipped on user-service first — [env standard](../configuration/environment-variables.md#database-client-pool--retry-standard) |
 | **Hosting** | Render (APIs + static site) + custom domain `sharingbridge.org` | Zero/low-cost deploy, Git-linked deploys; GoDaddy DNS for the public site |
 | **Maps (tiles)** | Google Maps SDK on Android when keyed | Familiar cab-style picker; key stays in `local.properties`, not Dart |
 | **Reverse geocode** | Nominatim on integration-service | No Google Geocoding bill for MVP; postal/`locality_key` derivation server-side |
@@ -131,7 +131,7 @@ Strategy ADR: [Location_Services_Vendor_Abstraction.md](./Location_Services_Vend
 
 ## Table of Contents
 
-- **[As-built architecture (July 2026)](#as-built-architecture-july-2026)** ← **start here**
+- **[As-built architecture (August 2026)](#as-built-architecture-august-2026)** ← **start here**
 - Sections 1–10 below = scale / historical target design (may conflict with As-built)
 
 1. [System Overview](#1-system-overview)
@@ -150,12 +150,12 @@ Strategy ADR: [Location_Services_Vendor_Abstraction.md](./Location_Services_Vend
 ## 1. System Overview
 [↑ Back to Table of Contents](#table-of-contents)
 
-> **Scale / target section.** For what runs today, use [As-built](#as-built-architecture-july-2026).
+> **Scale / target section.** For what runs today, use [As-built](#as-built-architecture-august-2026).
 
 ### 1.1 Architecture Principles
 - **Microservices-based** - Loosely coupled services for independent scaling
-- **Experience API edge** - Clients call `integration-service` only; internal services stay behind it (see [As-built](#as-built-architecture-july-2026))
-- **Cloud-native** - Containerized Python services; stateless Node APIs on Render for MVP
+- **Experience API edge** - Clients call `integration-service` only; internal services stay behind it (see [As-built](#as-built-architecture-august-2026))
+- **Cloud-native** - Containerized Python/.NET services; Node APIs on Render for MVP Experience/notification paths
 - **API-first** - Well-defined contracts between services (`design/contracts/`)
 - **Event-driven** (target) - Asynchronous order tracking; MVP paths are mostly synchronous HTTP
 - **Zero payment liability** - No financial transaction handling
@@ -670,7 +670,7 @@ photos
 
 ### 3.5 Integration Service
 
-**Architectural role (as-built):** **Experience API** / **shared BFF** — the only backend mobile and web call for initiator and coordinator journeys. Composes user-service, ai-orchestration, and Postgres order-intent data; applies auth, CORS, and degraded-mode fallbacks. See [As-built architecture](#as-built-architecture-july-2026).
+**Architectural role (as-built):** **Experience API** / **shared BFF** — the only backend mobile and web call for initiator and coordinator journeys. Composes user-service, ai-orchestration, and Postgres order-intent data; applies auth, CORS, and degraded-mode fallbacks. See [As-built architecture](#as-built-architecture-august-2026).
 
 **Shipped responsibilities (MVP):**
 - Vendor preset setup: suggest-vendors, preferences proxy to user-service

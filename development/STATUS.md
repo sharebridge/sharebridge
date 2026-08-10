@@ -56,7 +56,7 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 
 | Repo | Role | Status |
 |------|------|--------|
-| `sharingbridge-user-service` | Auth, presets, Postgres users (**C# / ASP.NET Core 8**; Node MVP in `legacy-node/`) | **Shipped** (C# cutover pending Render Docker deploy) |
+| `sharingbridge-user-service` | Auth, presets, Postgres users (**C# / ASP.NET Core 8**) | **Shipped** (Render Docker; env-driven `DB_POOL_*` / `DB_RETRY_*`) |
 | `sharingbridge-integration-service` | Experience API / BFF | **Shipped** |
 | `sharingbridge-mobile-app` | Initiator Flutter app | **Shipped** |
 | `sharingbridge-web-app` | Coordinator + initiator (limited) dashboard | **Shipped** |
@@ -104,8 +104,8 @@ Detail: [database-setup-sequence.md](../configuration/database-setup-sequence.md
 
 ## Next priorities
 
-1. **Deploy C# user-service** on Render (Docker) — same env vars; smoke Google sign-in.
-2. **Revise notification-service to Spring Boot** — keep `POST /internal/connection-ready` + FCM contract; Docker on Render.
+1. **Apply env-driven DB pool + retry pattern** to other Postgres clients (integration-service Node `pg`, photo-service, notification-service / Spring Boot rewrite) — same knobs as user-service (`DB_POOL_*`, `DB_RETRY_*`); prefer Supabase **session** pooler (`:5432`) for long-lived processes. See [environment-variables.md](../configuration/environment-variables.md#database-client-pool--retry-standard).
+2. **Revise notification-service to Spring Boot** — keep `POST /internal/connection-ready` + FCM contract; Docker on Render; adopt the same DB access env standard.
 3. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
 4. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.
 5. **Mobile Connection panel** — in-app order-code lookup. **Shipped** (Order contacts on home + initiation detail).
@@ -115,7 +115,7 @@ Detail: [database-setup-sequence.md](../configuration/database-setup-sequence.md
 9. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
 10. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
 11. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
-12. **integration-service → Spring Boot** (larger cutover; after user + notification beachheads).
+12. **integration-service → Spring Boot** (larger cutover; after user + notification beachheads) — carry over DB pool/retry env standard.
 
 Session backlog and commit log: [AGENT_SESSION.md](./AGENT_SESSION.md).
 

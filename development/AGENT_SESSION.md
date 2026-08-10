@@ -9,9 +9,12 @@ MVP **initiator vendor presets → Help a seeker / eco kitchen initiation → ve
 ## Locked approach
 
 - Payments: provider/vendor-hosted only; no platform ledger.
-- Mobile: Flutter; MVP backends: Node 20 HTTP (not NestJS in production).
+- Mobile: Flutter; Experience API: Node 20 HTTP today (Spring Boot later for integration).
+- Auth / System: **user-service is ASP.NET Core 8 (C#)** on Render Docker (Endpoints / Services / Repositories layout).
+- Notifications: Node today → **Spring Boot** next.
 - Preferences: user-service Postgres authority; client cache non-authoritative.
 - Labels: Experience API = integration-service; Process = ai-orchestration, photo-service, notification-service; System = user-service + Postgres.
+- **DB access:** env-driven pool/retry (`DB_POOL_*`, `DB_RETRY_*`) shipped on user-service; apply the same names to other Postgres clients in follow-up work. Prefer Supabase **session** pooler for long-lived APIs.
 
 Full progress vs plan: **[STATUS.md](./STATUS.md)**.
 
@@ -40,16 +43,16 @@ Prefer `configuration/*` and `MANUAL_TESTING_GUIDE.md` over per-repo READMEs for
 ## Quick runbook
 
 ```text
-integration-service   npm test && npm start     → :8080
-user-service          npm test && npm start     → :8081
-ai-orchestration      pytest -q && uvicorn…     → :8091
-photo-service         (venv) pytest && uvicorn  → :8092
-notification-service  npm test && npm start     → :8093
-web-app               npm test && npm run dev    → :5173
+integration-service   npm test && npm start                          → :8080
+user-service          dotnet test && dotnet run --project src/SharingBridge.UserService → :8081
+ai-orchestration      pytest -q && uvicorn…                          → :8091
+photo-service         (venv) pytest && uvicorn                       → :8092
+notification-service  npm test && npm start                          → :8093
+web-app               npm test && npm run dev                         → :5173
 mobile                flutter test && flutter run (see mobile-client.md)
 ```
 
-Google sign-in and emulator URLs: [configuration/mobile-client.md](../configuration/mobile-client.md). Dev JWT: `node scripts/mint-dev-jwt.mjs demo-user initiator` in user-service.
+Google sign-in and emulator URLs: [configuration/mobile-client.md](../configuration/mobile-client.md). Dev JWT: `dotnet run --project tools/MintDevJwt -- demo-user initiator` in user-service (same `AUTH_TOKEN_SECRET`).
 
 ---
 
@@ -67,11 +70,13 @@ Google sign-in and emulator URLs: [configuration/mobile-client.md](../configurat
 
 ## Next recommended tasks
 
-1. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
-2. **Transactional email** — Resend/SendGrid in notification-service.
-3. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
-4. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
-5. **APK rebuild** — `WEB_DASHBOARD_URL=https://sharingbridge.org`.
+1. **Roll out `DB_POOL_*` / `DB_RETRY_*`** to integration / photo / notification — [environment-variables.md § Database client pool & retry](../configuration/environment-variables.md#database-client-pool--retry-standard).
+2. **notification-service → Spring Boot** — same webhook contract; Docker on Render; adopt `DB_*` knobs.
+3. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
+4. **Transactional email** — Resend/SendGrid in notification-service (after Spring rewrite preferred).
+5. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
+6. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
+7. **APK rebuild** — `WEB_DASHBOARD_URL=https://sharingbridge.org`.
 
 After shipping, update [STATUS.md](./STATUS.md) workstream table.
 
@@ -103,5 +108,8 @@ After shipping, update [STATUS.md](./STATUS.md) workstream table.
 - `docs`: Future_Extensions Phase C (recurring orders) + Phase D summary; PRODUCT_MODEL § Producer supply & recipe BOM; ENGINEERING_PLAN phases J–K.
 - `feat` (web): Help dialog + GitHub README on sign-in; simplified sign-in copy.
 - `docs`: README + As-built architecture rewritten (stack + why); trimmed outdated README claims; STATUS remains source of truth for shipped.
+- `feat` (user-service): C# / ASP.NET Core 8 on Render Docker; Supabase session pooler; env-driven `DB_POOL_*` / `DB_RETRY_*` (standard for other Postgres clients next).
+- `docs`: DB client pool/retry standard; session vs transaction pooler guidance for Npgsql vs Node.
+- `chore` (user-service): remove dead Node `legacy-node/`; Endpoints/Services/Repositories layout; `tools/MintDevJwt`.
 
 Older history: git log on `sharingbridge` and service repos.

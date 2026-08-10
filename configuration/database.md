@@ -75,20 +75,34 @@ Skipped-step symptoms: [database-setup-sequence.md](./database-setup-sequence.md
 ## Step 3 — Get `DATABASE_URL` from Supabase
 
 1. **Project Settings** (gear) → **Database**.
-2. Under **Connection string**, choose **URI**.
-3. For Node on **Render**, prefer **Connection pooling** → **Transaction** mode (port often `6543`) if Supabase shows it — better for serverless/long-lived web services. **Session** mode (port `5432`) is fine for local dev.
+2. Under **Connection string**, choose **URI** (or **Connection pooling**).
+3. Pick mode by client runtime:
+
+   | Client | Prefer | Port (typical) | Why |
+   |--------|--------|----------------|-----|
+   | **user-service (C# / Npgsql)** | **Session** pooler | `5432` on `*.pooler.supabase.com` | Transaction mode (`6543`) caused Npgsql read timeouts; service rewrites `6543`→`5432` when `DB_REWRITE_SUPABASE_TRANSACTION_PORT=true` |
+   | **integration / notification (Node `pg`)** | Session or Transaction | `5432` or `6543` | `pg` tolerates transaction mode; align on **session** when applying shared `DB_*` knobs |
+   | **photo-service (Python)** | Session for long-lived workers | `5432` | Same long-lived process guidance |
+   | Local Docker/Postgres | Direct | `5432` | No pooler |
+
 4. Copy the URI. Replace `[YOUR-PASSWORD]` with your database password.
-5. Example shape (yours will differ):
+5. Example shapes (yours will differ):
 
    ```text
+   # Preferred for ASP.NET Core user-service (session pooler)
+   postgresql://postgres.[project-ref]:YOUR_PASSWORD@aws-0-[region].pooler.supabase.com:5432/postgres
+
+   # Transaction pooler (often fine for Node today; avoid for Npgsql unless rewritten)
    postgresql://postgres.[project-ref]:YOUR_PASSWORD@aws-0-[region].pooler.supabase.com:6543/postgres
    ```
 
 6. If the URI contains `?pgbouncer=true`, keep that query string for pooler URLs.
 
+**Pool / retry env (standard):** after `DATABASE_URL` is set, tune client behaviour with `DB_POOL_*` / `DB_RETRY_*` — shipped on user-service; roll out to other services next. See [environment-variables.md § Database client pool & retry](./environment-variables.md#database-client-pool--retry-standard).
+
 **Security:** This string is a **secret**. Store it only in:
 
-- Render → **Environment** (user-service + integration-service)
+- Render → **Environment** (user-service + integration-service + photo-service + notification-service as needed)
 - Local `.env` files (gitignored — never commit)
 
 ---

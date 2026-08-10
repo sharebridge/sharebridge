@@ -11,9 +11,10 @@
 | **Deploy to Render** | [e2e-deployment-sequence.md](./e2e-deployment-sequence.md) Phases **2–5** → [backend-render.md](./backend-render.md) for env keys per service |
 | **Google OAuth / coordinator seed** | [google-auth-setup.md](./google-auth-setup.md) |
 | **All env vars (every service)** | [environment-variables.md](./environment-variables.md) |
+| **DB pool / retry env (all Postgres clients)** | [environment-variables.md § Database client pool & retry](./environment-variables.md#database-client-pool--retry-standard) — shipped on user-service; apply same names to integration / photo / notification next |
 | **Troubleshoot sign-in / CORS / roles** | [authentication.md](./authentication.md) + [google-auth-setup.md](./google-auth-setup.md) |
 
-**Per-repo env:** copy each repo’s `env.example` → `.env` (gitignored). Full index: [environment-variables.md](./environment-variables.md).
+**Per-repo env:** copy each repo’s `env.example` or `.env.example` → `.env` (gitignored). **user-service** uses `.env.example` and must **export** vars into the shell (no dotenv). Full index: [environment-variables.md](./environment-variables.md).
 
 ---
 
@@ -71,9 +72,9 @@ Optional branches (any time after Phase 1):
 
 ## Local stack (quick checklist)
 
-Copy each repo’s `env.example` → `.env`. **All keys and local defaults:** [environment-variables.md](./environment-variables.md) (§ per service + § Local stack defaults). Mobile uses `--dart-define` — [mobile-client.md](./mobile-client.md).
+Copy each repo’s `env.example` / `.env.example` → `.env`. **All keys and local defaults:** [environment-variables.md](./environment-variables.md) (§ per service + § Local stack defaults). Mobile uses `--dart-define` — [mobile-client.md](./mobile-client.md).
 
-Restart Node after `.env` changes. Restart `npm run dev` after web `VITE_*` changes.
+Restart Node after `.env` changes. Re-export user-service env (or restart the IDE run) after `.env` edits. Restart `npm run dev` after web `VITE_*` changes.
 
 ---
 

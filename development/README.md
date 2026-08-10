@@ -1,6 +1,6 @@
 # Development docs
 
-**Start:** [README.md](../README.md) · **Shipped:** [STATUS.md](./STATUS.md) · **Stack today:** [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-july-2026)
+**Start:** [README.md](../README.md) · **Shipped:** [STATUS.md](./STATUS.md) · **Stack today:** [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-august-2026)
 
 | File | Owns |
 |------|------|

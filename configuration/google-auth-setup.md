@@ -115,7 +115,7 @@ Only if you run on iPhone/iPad:
 
 1. Create **iOS** OAuth client in the same Credentials page.
 2. Bundle ID from Xcode / `ios/Runner.xcodeproj`.
-3. Set `GOOGLE_CLIENT_ID_IOS` in user-service `.env` (code reads it via `googleAuth.js`).
+3. Set `GOOGLE_CLIENT_ID_IOS` in user-service `.env` (read by `GoogleAuthService`).
 
 ### 2.4 Windows / Linux desktop
 
@@ -154,29 +154,32 @@ Coordinators are **not** configured in Google Console or in user-service `.env`.
 
 ### 4.1 `sharingbridge-user-service/.env`
 
-Copy from `env.example`:
+Copy from `.env.example` (note the leading dot):
 
 ```powershell
 cd D:\kannan\sharingbridge\sharingbridge-user-service
-copy env.example .env
+copy .env.example .env
 ```
 
-Set at minimum:
+Full key list: [environment-variables.md](./environment-variables.md) § **sharingbridge-user-service**. Set at minimum:
 
 ```env
+DATABASE_URL=postgresql://…@…pooler.supabase.com:5432/postgres
 AUTH_TOKEN_SECRET=your-long-random-secret-shared-with-integration
 AUTH_TOKEN_ISSUER=sharingbridge-user-service
 AUTH_TOKEN_AUDIENCE=sharingbridge-clients
 AUTH_TOKEN_TTL_SECONDS=3600
 
-# Local laptop only — browser origin for Vite (:5173). On Render, set https://<static-site>.onrender.com in the dashboard (both backends).
+# Local laptop only — browser origin for Vite (:5173). On Render, set https://sharingbridge.org,… in the dashboard (both backends).
 WEB_CORS_ORIGINS=http://localhost:5173
 
 GOOGLE_CLIENT_ID_WEB=123456789-xxxx.apps.googleusercontent.com
 GOOGLE_CLIENT_ID_ANDROID=123456789-yyyy.apps.googleusercontent.com
 ```
 
-`AUTH_TOKEN_SECRET` must **match** integration-service (see below).
+Optional pool/retry knobs (`DB_POOL_*`, `DB_RETRY_*`) are documented in the same env table; defaults apply when unset.
+
+**Important:** ASP.NET Core does **not** auto-load `.env`. Export into the shell (or set in your IDE run config) before `dotnet run` — see [backend-render.md § Local .env](./backend-render.md#local-env-not-used-on-render).
 
 Generate a secret (PowerShell):
 
@@ -218,7 +221,7 @@ Use **three terminals** (see [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING
 
 | Service | Port | Command |
 |---------|------|---------|
-| user-service | 8081 | `npm start` |
+| user-service | 8081 | Export `.env` then `dotnet run --project src/SharingBridge.UserService` |
 | integration-service | 8080 | `npm start` |
 | web app | 5173 | `npm run dev` |
 

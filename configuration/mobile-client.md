@@ -68,7 +68,7 @@ Use **Google Sign-In** with hosted `USER_SERVICE_BASE_URL` and `GOOGLE_CLIENT_ID
 
 ## Google Sign-In (local, recommended)
 
-**Windows / Linux desktop:** `google_sign_in` is **not supported** — the app shows an explanation instead of `MissingPluginException`. Use an **Android emulator**, a physical Android device, or **macOS** for Google auth. Desktop dev fallback: `--dart-define=AUTH_TOKEN=…` (JWT from `node scripts/mint-dev-jwt.mjs` in user-service with the same `AUTH_TOKEN_SECRET`).
+**Windows / Linux desktop:** `google_sign_in` is **not supported** — the app shows an explanation instead of `MissingPluginException`. Use an **Android emulator**, a physical Android device, or **macOS** for Google auth. Desktop dev fallback: `--dart-define=AUTH_TOKEN=…` (JWT from `dotnet run --project tools/MintDevJwt -v q --` in user-service with the same `AUTH_TOKEN_SECRET`).
 
 Full checklist: [google-auth-setup.md](./google-auth-setup.md).
 
@@ -114,7 +114,7 @@ Mint on the PC with the same `AUTH_TOKEN_SECRET` as your local user-service `.en
 
 ```powershell
 cd D:\kannan\sharingbridge\sharingbridge-user-service
-$token = node scripts/mint-dev-jwt.mjs demo-user initiator
+$token = dotnet run --project tools/MintDevJwt -v q -- demo-user initiator
 cd ..\sharingbridge-mobile-app
 flutter run -d emulator-5554 `
   --dart-define=USER_SERVICE_BASE_URL=http://10.0.2.2:8081 `
