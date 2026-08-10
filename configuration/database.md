@@ -80,7 +80,7 @@ Skipped-step symptoms: [database-setup-sequence.md](./database-setup-sequence.md
 
    | Client | Prefer | Port (typical) | Why |
    |--------|--------|----------------|-----|
-   | **user-service (C# / Npgsql)** | **Session** pooler | `5432` on `*.pooler.supabase.com` | Transaction mode (`6543`) caused Npgsql read timeouts; service rewrites `6543`→`5432` when `DB_REWRITE_SUPABASE_TRANSACTION_PORT=true` |
+   | **user-service (C# / Npgsql)** | **Session** pooler | `5432` on `*.pooler.supabase.com` | Transaction mode (`6543`) caused Npgsql read timeouts; service rewrites `6543`→`5432` when `DB_SUPABASE_POOL_6543TRANS_5432SESSION=true` |
    | **integration / notification (Node `pg`)** | Session or Transaction | `5432` or `6543` | `pg` tolerates transaction mode; align on **session** when applying shared `DB_*` knobs |
    | **photo-service (Python)** | Session for long-lived workers | `5432` | Same long-lived process guidance |
    | Local Docker/Postgres | Direct | `5432` | No pooler |
