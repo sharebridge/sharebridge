@@ -72,7 +72,7 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
 | `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query / command timeout |
-| `DB_SUPABASE_POOL_6543TRANS_5432SESSION` | `5432SESSION` | (.NET) On `*.pooler.supabase.com`: `5432SESSION` \| `6543TRANS` \| `AS_IS` |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | (.NET) On `*.pooler.supabase.com`: `5432` (session) \| `6543` (transaction) |
 | `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries (timeouts / stream errors) |
 | `DB_RETRY_BASE_DELAY_MS` | `200` | Backoff base (`delay ≈ base × attempt²`) |
 
@@ -107,7 +107,7 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 | `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
 | `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query timeout |
-| `DB_SUPABASE_POOL_6543TRANS_5432SESSION` | `5432SESSION` | On `*.pooler.supabase.com`, force pooler mode: **`5432SESSION`** (default, Npgsql-safe), **`6543TRANS`**, or **`AS_IS`** (leave URI port). Legacy bool `true`/`false` still accepted (`true`→`5432SESSION`, `false`→`AS_IS`). |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | On `*.pooler.supabase.com`, force pooler port: **`5432`** (session, default, Npgsql-safe) or **`6543`** (transaction). |
 | `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries on Google sign-in path |
 | `DB_RETRY_BASE_DELAY_MS` | `200` | Base backoff for retries (`delay = base * attempt²`) |
 | `GOOGLE_CLIENT_ID_ANDROID` | Android OAuth client ID | when mobile uses Google |
