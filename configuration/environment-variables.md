@@ -72,7 +72,7 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
 | `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query / command timeout |
-| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | (.NET) On `*.pooler.supabase.com`: `5432` (session) \| `6543` (transaction) |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | (.NET) On `*.pooler.supabase.com`: `5432` \| `6543` only; other values fail startup |
 | `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries (timeouts / stream errors) |
 | `DB_RETRY_BASE_DELAY_MS` | `200` | Backoff base (`delay ≈ base × attempt²`) |
 
