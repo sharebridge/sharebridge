@@ -114,5 +114,6 @@ After shipping, update [STATUS.md](./STATUS.md) workstream table.
 - `docs`: DB client pool/retry standard; session vs transaction pooler guidance for Npgsql vs Node.
 - `chore` (user-service): remove dead Node `legacy-node/`; Endpoints/Services/Repositories layout; `tools/MintDevJwt`.
 - `feat` (notification-service): Spring Boot 3 / Java 21 rewrite; FCM + `DB_*` / Supabase pool port; Node MVP in `legacy-node/`; Docker/CI.
+- `chore` (integration-service): Spring Boot beachhead + preferences/AI/device-tokens/geocode slices; Node still serves Render via `legacy-node/`.
 
 Older history: git log on `sharingbridge` and service repos.
