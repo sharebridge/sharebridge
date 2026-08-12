@@ -9,7 +9,7 @@ Tables are sorted **A–Z by variable name** to match Render’s environment UI.
 | ai-orchestration | `sharingbridge-ai-orchestration/.env` | `uvicorn` |
 | integration-service | `sharingbridge-integration-service/.env` | `npm start` |
 | mobile-app | `--dart-define=…` on `flutter run` | compile time (no `.env` in repo) |
-| notification-service | `sharingbridge-notification-service/.env` | `npm start` |
+| notification-service | `sharingbridge-notification-service/.env` (export into shell) | `mvn spring-boot:run` |
 | photo-service | `sharingbridge-photo-service/.env` | `uvicorn` / pytest |
 | user-service | `sharingbridge-user-service/.env` (export into shell) or IDE env | `dotnet run --project src/SharingBridge.UserService` |
 | web-app | `sharingbridge-web-app/.env` | `npm run dev` / **build** (`VITE_*` baked into `dist/`) |
@@ -81,9 +81,9 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | Service | Today | Next step |
 |---------|--------|-----------|
 | user-service (C#) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
-| integration-service (Node `pg`) | Pool defaults inside `pg.Pool`; no shared `DB_*` knobs | Add the same env names when next touching DB bootstrap |
+| notification-service (Spring) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
 | photo-service (Python) | App-specific | Align naming when next DB hardening pass |
-| notification-service | Node today → Spring Boot | Adopt `DB_*` in the Spring rewrite |
+| integration-service (Node → Spring Boot) | Pool defaults inside `pg.Pool`; no shared `DB_*` knobs | Adopt `DB_*` in the **Spring Boot** rewrite (not on Node first) |
 
 Do **not** put passwords or full URIs in these knobs — only pool/retry behaviour. Connection identity stays in `DATABASE_URL`.
 
@@ -155,10 +155,21 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 
 ## `sharingbridge-notification-service`
 
+**Runtime:** Spring Boot 3 / Java 21 (Docker on Render). Node MVP under `legacy-node/`.  
+**Template:** `.env.example` → `.env`, then export into the shell before `mvn spring-boot:run`.
+
 | Variable | Local example | Render production |
 |----------|---------------|-------------------|
 | `DATABASE_URL` | **same** as integration-service | same — reads `device_tokens` |
-| `DB_POOL_*` / `DB_RETRY_*` | *(not wired yet)* | **Planned** — adopt in the **Spring Boot** rewrite ([shared standard](#database-client-pool--retry-standard)) |
+| `DB_POOLING` | `true` | Client connection pooling on/off |
+| `DB_POOL_MIN` | `0` | Min pooled connections |
+| `DB_POOL_MAX` | `5` | Max pooled connections |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Idle drop |
+| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
+| `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query timeout |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | `5432` \| `6543` only; other values fail startup |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries |
+| `DB_RETRY_BASE_DELAY_MS` | `200` | Backoff base |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | *(optional locally if using PATH)* | **Preferred on Render** — paste full Admin SDK JSON from Firebase Console (see below) |
 | `FIREBASE_SERVICE_ACCOUNT_PATH` | `.\firebase-adminsdk.json` | **Do not use on Render** — local `.env` only; path to downloaded Admin SDK key file |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |

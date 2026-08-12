@@ -14,7 +14,7 @@ Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Te
 | **System** | `sharingbridge-user-service` | **Docker (.NET 8 / C#)** | integration + web (Google auth) |
 | **Process** | `sharingbridge-ai-orchestration` | Docker | integration (`/internal/...`) |
 | **Process** | `sharingbridge-photo-service` | Docker | mobile (`PHOTO_SERVICE_BASE_URL`) |
-| **Process** | `sharingbridge-notification-service` | Node 20 → **Spring Boot** next | integration only (`CONNECTION_NOTIFY_WEBHOOK_URL`) |
+| **Process** | `sharingbridge-notification-service` | **Docker (Spring Boot / Java 21)** | integration only (`CONNECTION_NOTIFY_WEBHOOK_URL`) |
 | **Client** | `sharingbridge-web-app` | **Static Site** | coordinator browser |
 
 **Not on Render for MVP:** `sharingbridge-location-safety` (archived), api-gateway, order-service.
@@ -120,8 +120,9 @@ Rules:
 
 ### Create on Render
 
-1. **New +** → **Web Service** → repo `sharingbridge-notification-service`, branch `main`.
-2. **Runtime:** Node 20 · **Build:** `npm install` · **Start:** `npm start` · **Health:** `/health`
+1. **New +** → **Web Service** → repo `sharingbridge-notification-service`, branch `main` (or Blueprint `render.yaml`).
+2. **Runtime:** **Docker** · clear any leftover `npm` build/start · **Health:** `/health`
+3. Leave **Start Command** blank when using Dockerfile.
 3. Or **Blueprint** → apply root `render.yaml` → set secrets when prompted.
 
 **Local port:** `8093` (photo-service uses `8092`). On Render, `PORT` is injected — do not set it.
@@ -180,7 +181,8 @@ copy env.example .env
 # optional push: CONNECTION_NOTIFY_WEBHOOK_URL=http://localhost:8093/internal/connection-ready
 
 cd ..\sharingbridge-notification-service
-copy env.example .env
+copy .env.example .env
+# export env into shell, then: mvn spring-boot:run
 # same DATABASE_URL; WEBHOOK_SECRET matches integration CONNECTION_NOTIFY_WEBHOOK_SECRET
 # FIREBASE_SERVICE_ACCOUNT_PATH=.\firebase-adminsdk.json
 ```

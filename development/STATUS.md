@@ -62,7 +62,7 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 | `sharingbridge-web-app` | Coordinator + initiator (limited) dashboard | **Shipped** |
 | `sharingbridge-ai-orchestration` | suggest-vendors, instruction-pack | **Shipped** (deterministic + live) |
 | `sharingbridge-photo-service` | Reference photo upload | **Shipped** (no vision/embeddings) |
-| `sharingbridge-notification-service` | FCM on kitchen commit | **Shipped** (Node) — **revise to Spring Boot** (same `/internal/connection-ready` contract) |
+| `sharingbridge-notification-service` | FCM on kitchen commit | **Shipped** (**Spring Boot / Java 21**; Node MVP in `legacy-node/`) |
 | `sharingbridge-api-gateway`, `order-service`, `infra` | Scale path | **Not started** |
 | `sharingbridge-location-safety` | Geo scoring | **Archived** |
 
@@ -104,18 +104,18 @@ Detail: [database-setup-sequence.md](../configuration/database-setup-sequence.md
 
 ## Next priorities
 
-1. **Apply env-driven DB pool + retry pattern** to other Postgres clients (integration-service Node `pg`, photo-service, notification-service / Spring Boot rewrite) — same knobs as user-service (`DB_POOL_*`, `DB_RETRY_*`); prefer Supabase **session** pooler (`:5432`) for long-lived processes. See [environment-variables.md](../configuration/environment-variables.md#database-client-pool--retry-standard).
-2. **Revise notification-service to Spring Boot** — keep `POST /internal/connection-ready` + FCM contract; Docker on Render; adopt the same DB access env standard.
-3. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
-4. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.
-5. **Mobile Connection panel** — in-app order-code lookup. **Shipped** (Order contacts on home + initiation detail).
-6. **Transactional email** in notification-service (Resend/SendGrid) — prefer after Spring Boot rewrite.
-7. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
-8. **UX redesign** — web hash routes shipped; mobile step wizards remain.
-9. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
-10. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
-11. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
-12. **integration-service → Spring Boot** (larger cutover; after user + notification beachheads) — carry over DB pool/retry env standard.
+1. **Revise notification-service to Spring Boot** — **in progress locally** (same contracts + `DB_*`); push + Render Docker cutover next.
+2. **integration-service → Spring Boot** (after notification beachhead) — then apply the same DB access env standard (do **not** harden Node `pg` first).
+3. **photo-service** — align Python DB client with shared `DB_*` names when next hardening.
+4. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
+5. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.
+6. **Mobile Connection panel** — in-app order-code lookup. **Shipped** (Order contacts on home + initiation detail).
+7. **Transactional email** in notification-service (Resend/SendGrid) — prefer after Spring Boot rewrite.
+8. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
+9. **UX redesign** — web hash routes shipped; mobile step wizards remain.
+10. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
+11. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
+12. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
 
 Session backlog and commit log: [AGENT_SESSION.md](./AGENT_SESSION.md).
 

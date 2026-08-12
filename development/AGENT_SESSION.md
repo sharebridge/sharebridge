@@ -70,13 +70,14 @@ Google sign-in and emulator URLs: [configuration/mobile-client.md](../configurat
 
 ## Next recommended tasks
 
-1. **Roll out `DB_POOL_*` / `DB_RETRY_*`** to integration / photo / notification — [environment-variables.md § Database client pool & retry](../configuration/environment-variables.md#database-client-pool--retry-standard).
-2. **notification-service → Spring Boot** — same webhook contract; Docker on Render; adopt `DB_*` knobs.
-3. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
-4. **Transactional email** — Resend/SendGrid in notification-service (after Spring rewrite preferred).
-5. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
-6. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
-7. **APK rebuild** — `WEB_DASHBOARD_URL=https://sharingbridge.org`.
+1. **notification-service → Spring Boot** — same webhook contract; Docker on Render; adopt `DB_*` knobs (in progress).
+2. **integration-service → Spring Boot** — after notification; apply `DB_*` then (not on Node `pg` first).
+3. **photo-service `DB_*`** — when next DB hardening pass.
+4. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
+5. **Transactional email** — Resend/SendGrid in notification-service (after Spring rewrite preferred).
+6. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
+7. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
+8. **APK rebuild** — `WEB_DASHBOARD_URL=https://sharingbridge.org`.
 
 After shipping, update [STATUS.md](./STATUS.md) workstream table.
 
