@@ -9,9 +9,9 @@ MVP **initiator vendor presets → Help a seeker / eco kitchen initiation → ve
 ## Locked approach
 
 - Payments: provider/vendor-hosted only; no platform ledger.
-- Mobile: Flutter; Experience API: Node 20 HTTP today (Spring Boot later for integration).
+- Mobile: Flutter; Experience API: Node 20 HTTP today → **Spring Boot next** (integration).
 - Auth / System: **user-service is ASP.NET Core 8 (C#)** on Render Docker (Endpoints / Services / Repositories layout).
-- Notifications: Node today → **Spring Boot** next.
+- Notifications: **Spring Boot / Java 21** (Node MVP in `legacy-node/`).
 - Preferences: user-service Postgres authority; client cache non-authoritative.
 - Labels: Experience API = integration-service; Process = ai-orchestration, photo-service, notification-service; System = user-service + Postgres.
 - **DB access:** env-driven pool/retry (`DB_POOL_*`, `DB_RETRY_*`) shipped on user-service; apply the same names to other Postgres clients in follow-up work. Prefer Supabase **session** pooler for long-lived APIs.
@@ -43,11 +43,12 @@ Prefer `configuration/*` and `MANUAL_TESTING_GUIDE.md` over per-repo READMEs for
 ## Quick runbook
 
 ```text
-integration-service   npm test && npm start                          → :8080
+integration-service   cd legacy-node && npm test && npm start        → :8080
+                      (Spring beachhead: mvn test && mvn spring-boot:run — /health only so far)
 user-service          dotnet test && dotnet run --project src/SharingBridge.UserService → :8081
 ai-orchestration      pytest -q && uvicorn…                          → :8091
 photo-service         (venv) pytest && uvicorn                       → :8092
-notification-service  npm test && npm start                          → :8093
+notification-service  mvn test && mvn spring-boot:run                → :8093
 web-app               npm test && npm run dev                         → :5173
 mobile                flutter test && flutter run (see mobile-client.md)
 ```
@@ -70,8 +71,8 @@ Google sign-in and emulator URLs: [configuration/mobile-client.md](../configurat
 
 ## Next recommended tasks
 
-1. **notification-service → Spring Boot** — same webhook contract; Docker on Render; adopt `DB_*` knobs (in progress).
-2. **integration-service → Spring Boot** — after notification; apply `DB_*` then (not on Node `pg` first).
+1. **integration-service → Spring Boot** — same `/v1` contracts; Docker on Render; adopt `DB_*` (in progress). Keep Node under `legacy-node/` until cutover.
+2. **Render cutover (notification)** — confirm Docker runtime; clear leftover `npm` build/start if still set.
 3. **photo-service `DB_*`** — when next DB hardening pass.
 4. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
 5. **Transactional email** — Resend/SendGrid in notification-service (after Spring rewrite preferred).
@@ -112,5 +113,6 @@ After shipping, update [STATUS.md](./STATUS.md) workstream table.
 - `feat` (user-service): C# / ASP.NET Core 8 on Render Docker; Supabase session pooler; env-driven `DB_POOL_*` / `DB_RETRY_*` (standard for other Postgres clients next).
 - `docs`: DB client pool/retry standard; session vs transaction pooler guidance for Npgsql vs Node.
 - `chore` (user-service): remove dead Node `legacy-node/`; Endpoints/Services/Repositories layout; `tools/MintDevJwt`.
+- `feat` (notification-service): Spring Boot 3 / Java 21 rewrite; FCM + `DB_*` / Supabase pool port; Node MVP in `legacy-node/`; Docker/CI.
 
 Older history: git log on `sharingbridge` and service repos.

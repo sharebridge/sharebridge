@@ -10,7 +10,7 @@ Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Te
 
 | Layer | Repo | Runtime | Called by |
 |-------|------|---------|-----------|
-| **Experience** | `sharingbridge-integration-service` | Node 20 | mobile, web |
+| **Experience** | `sharingbridge-integration-service` | Node 20 (`legacy-node/` until Spring cutover) | mobile, web |
 | **System** | `sharingbridge-user-service` | **Docker (.NET 8 / C#)** | integration + web (Google auth) |
 | **Process** | `sharingbridge-ai-orchestration` | Docker | integration (`/internal/...`) |
 | **Process** | `sharingbridge-photo-service` | Docker | mobile (`PHOTO_SERVICE_BASE_URL`) |
@@ -41,8 +41,8 @@ Node services that use Postgres **require** `DATABASE_URL` at startup (no in-mem
 
 | Field | User-service | AI orchestration | Integration | Photo service | Notification service |
 |-------|--------------|------------------|-------------|---------------|----------------------|
-| Build Command | *(empty — Docker)* | *(empty)* | `npm install` | *(empty — Docker)* | `npm install` |
-| Start Command | **blank** | **blank** | `npm start` | **blank** | `npm start` |
+| Build Command | *(empty — Docker)* | *(empty)* | `npm install --prefix legacy-node` | *(empty — Docker)* | *(empty — Docker)* |
+| Start Command | **blank** | **blank** | `npm start --prefix legacy-node` | **blank** | **blank** |
 | Pre-Deploy Command | blank | blank | blank | blank | blank |
 | Health Check Path | `/health` | `/health` | `/health` | `/health` | `/health` |
 | Auto-Deploy | **On commit** to `main` | same | same | same | same |

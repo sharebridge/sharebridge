@@ -7,7 +7,7 @@ Tables are sorted **A–Z by variable name** to match Render’s environment UI.
 | Service | Config file | Load when |
 |---------|-------------|-----------|
 | ai-orchestration | `sharingbridge-ai-orchestration/.env` | `uvicorn` |
-| integration-service | `sharingbridge-integration-service/.env` | `npm start` |
+| integration-service | `sharingbridge-integration-service/.env` | Node: `cd legacy-node && npm start`. Spring beachhead: export vars then `mvn spring-boot:run` |
 | mobile-app | `--dart-define=…` on `flutter run` | compile time (no `.env` in repo) |
 | notification-service | `sharingbridge-notification-service/.env` (export into shell) | `mvn spring-boot:run` |
 | photo-service | `sharingbridge-photo-service/.env` | `uvicorn` / pytest |
@@ -83,7 +83,7 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | user-service (C#) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
 | notification-service (Spring) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
 | photo-service (Python) | App-specific | Align naming when next DB hardening pass |
-| integration-service (Node → Spring Boot) | Pool defaults inside `pg.Pool`; no shared `DB_*` knobs | Adopt `DB_*` in the **Spring Boot** rewrite (not on Node first) |
+| integration-service (Node → Spring Boot) | **Node:** pool defaults inside `pg.Pool`. **Spring beachhead:** Hikari reads `DB_*` (routes still Node on Render) | Finish Spring `/v1` port, then Docker cutover |
 
 Do **not** put passwords or full URIs in these knobs — only pool/retry behaviour. Connection identity stays in `DATABASE_URL`.
 
@@ -138,8 +138,8 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 | `AUTH_TOKEN_SECRET` | **same** as user-service | same |
 | `CONNECTION_NOTIFY_WEBHOOK_SECRET` | *(unset)* | Shared secret sent as `X-Webhook-Secret` — must match notification-service `WEBHOOK_SECRET` |
 | `CONNECTION_NOTIFY_WEBHOOK_URL` | *(unset)* | Optional — POST JSON when eco kitchen commits (`connection_ready`); for notification-service or mailer |
-| `DATABASE_URL` | **same** as user-service | same — prefer Supabase **session** pooler (`:5432`) for this long-lived Node process |
-| `DB_POOL_*` / `DB_RETRY_*` | *(not wired yet)* | **Planned** — adopt the [shared standard](#database-client-pool--retry-standard) when next hardening `pg` bootstrap (same names as user-service) |
+| `DATABASE_URL` | **same** as user-service | same — prefer Supabase **session** pooler (`:5432`) for this long-lived process |
+| `DB_POOL_*` / `DB_RETRY_*` / `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | Spring beachhead reads them (Hikari); Node ignores | Same [shared standard](#database-client-pool--retry-standard) as user-service / notification |
 | `INITIATOR_NEIGHBOURHOOD_RADIUS_M` | `5000` | `5000` (`near_lat` / `near_lng` filter radius in **metres**; capped at 50000 server-side) |
 | `INITIATOR_NEIGHBOURHOOD_WINDOW_HOURS` | `2` | `2` (initiator list `since`, photo redaction; 1–72) |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |

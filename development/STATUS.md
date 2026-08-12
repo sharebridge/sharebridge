@@ -57,7 +57,7 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 | Repo | Role | Status |
 |------|------|--------|
 | `sharingbridge-user-service` | Auth, presets, Postgres users (**C# / ASP.NET Core 8**) | **Shipped** (Render Docker; env-driven `DB_POOL_*` / `DB_RETRY_*`) |
-| `sharingbridge-integration-service` | Experience API / BFF | **Shipped** |
+| `sharingbridge-integration-service` | Experience API / BFF | **Shipped** (Node; Spring Boot rewrite in progress) |
 | `sharingbridge-mobile-app` | Initiator Flutter app | **Shipped** |
 | `sharingbridge-web-app` | Coordinator + initiator (limited) dashboard | **Shipped** |
 | `sharingbridge-ai-orchestration` | suggest-vendors, instruction-pack | **Shipped** (deterministic + live) |
