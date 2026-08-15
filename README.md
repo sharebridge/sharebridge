@@ -16,7 +16,7 @@ SharingBridge helps people **arrange meals** — for themselves, family, seniors
 
 ```text
 Flutter mobile ──┐
-                 ├──► integration-service (Experience API / BFF · Node → Spring later)
+                 ├──► integration-service (Experience API / BFF · Spring Boot / Java 21)
 Vite/React web ──┘           │
                                ├──► user-service (C# / ASP.NET) → Postgres (auth, presets; DB_POOL_* / DB_RETRY_*)
                                ├──► ai-orchestration → Groq / Gemini
@@ -31,7 +31,7 @@ Vite/React web ──┘           │
 |-------|------|-------------|
 | Mobile | Flutter | One app for Android field flows |
 | Web | Vite + React | Static dashboard on Render |
-| Experience API | Node 20 HTTP → Spring Boot later | Small BFF; fast free-tier deploys |
+| Experience API | **Spring Boot / Java 21** (Docker) | Same `/v1` contracts; `DB_*` + GIS |
 | Auth | **C#** user-service + Google JWT | Identity separate from journeys; ASP.NET Core on Render Docker; env `DB_POOL_*` / `DB_RETRY_*` |
 | Notifications | **Spring Boot / Java 21** (Docker) | FCM webhook `/internal/connection-ready`; `DB_*` knobs |
 | AI | FastAPI + Groq/Gemini | Live enrichment required; fail closed if LLM down; prompts include content-safety rules |
@@ -48,7 +48,7 @@ Vite/React web ──┘           │
 | `sharingbridge` (this) | Docs and coordination |
 | `sharingbridge-mobile-app` | Flutter initiator app |
 | `sharingbridge-web-app` | Vite + React dashboard |
-| `sharingbridge-integration-service` | Experience API / BFF |
+| `sharingbridge-integration-service` | Experience API / BFF (**Spring Boot / Java 21**) |
 | `sharingbridge-user-service` | Auth + vendor presets (**ASP.NET Core / C#**; `DB_POOL_*` / `DB_RETRY_*`) |
 | `sharingbridge-ai-orchestration` | LLM pipelines |
 | `sharingbridge-photo-service` | Photo upload |

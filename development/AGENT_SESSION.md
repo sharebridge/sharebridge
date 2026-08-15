@@ -9,7 +9,7 @@ MVP **initiator vendor presets → Help a seeker / eco kitchen initiation → ve
 ## Locked approach
 
 - Payments: provider/vendor-hosted only; no platform ledger.
-- Mobile: Flutter; Experience API: Node 20 HTTP today → **Spring Boot next** (integration).
+- Mobile: Flutter; Experience API: **Spring Boot / Java 21** (Docker on Render).
 - Auth / System: **user-service is ASP.NET Core 8 (C#)** on Render Docker (Endpoints / Services / Repositories layout).
 - Notifications: **Spring Boot / Java 21** (Docker on Render).
 - Preferences: user-service Postgres authority; client cache non-authoritative.
@@ -43,8 +43,7 @@ Prefer `configuration/*` and `MANUAL_TESTING_GUIDE.md` over per-repo READMEs for
 ## Quick runbook
 
 ```text
-integration-service   cd legacy-node && npm test && npm start        → :8080
-                      (Spring: mvn test && mvn spring-boot:run — full /v1 in repo; not on Render yet)
+integration-service   mvn test && mvn spring-boot:run                → :8080
 user-service          dotnet test && dotnet run --project src/SharingBridge.UserService → :8081
 ai-orchestration      pytest -q && uvicorn…                          → :8091
 photo-service         (venv) pytest && uvicorn                       → :8092
@@ -71,13 +70,12 @@ Google sign-in and emulator URLs: [configuration/mobile-client.md](../configurat
 
 ## Next recommended tasks
 
-1. **integration-service Render Docker cutover** — Spring `/v1` is in repo; smoke then switch Runtime to Docker (empty build/start). Keep `legacy-node/` for rollback.
-2. **photo-service `DB_*`** — when next DB hardening pass.
-3. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
-4. **Transactional email** — Resend/SendGrid in notification-service.
-5. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
-6. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
-7. **APK rebuild** — `WEB_DASHBOARD_URL=https://sharingbridge.org`.
+1. **photo-service `DB_*`** — when next DB hardening pass.
+2. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
+3. **Transactional email** — Resend/SendGrid in notification-service.
+4. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
+5. **Marketplace F** — beneficiary profile (see [ENGINEERING_PLAN.md](./ENGINEERING_PLAN.md) § F).
+6. **APK rebuild** — `WEB_DASHBOARD_URL=https://sharingbridge.org`.
 
 After shipping, update [STATUS.md](./STATUS.md) workstream table.
 
@@ -113,8 +111,7 @@ After shipping, update [STATUS.md](./STATUS.md) workstream table.
 - `docs`: DB client pool/retry standard; session vs transaction pooler guidance for Npgsql vs Node.
 - `chore` (user-service): remove dead Node `legacy-node/`; Endpoints/Services/Repositories layout; `tools/MintDevJwt`.
 - `feat` (notification-service): Spring Boot 3 / Java 21 rewrite; FCM + `DB_*` / Supabase pool port; Node MVP in `legacy-node/`; Docker/CI.
-- `chore` (integration-service): Spring Boot `/v1` parity (order intents, seeker demands, marketplace, connections); Render still Node via `legacy-node/` until Docker cutover.
-
+- `chore` (integration-service): Spring Boot `/v1` on Render Docker; Node `legacy-node/` removed.
 - `chore` (notification-service): remove dead Node `legacy-node/`; Spring Boot / Docker only.
 
 Older history: git log on `sharingbridge` and service repos.

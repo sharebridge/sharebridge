@@ -108,12 +108,11 @@ Tokens are signed and verified with that **symmetric** secret (`AUTH_TOKEN_SECRE
 
 ## 1. Automated test suites
 
-### 1a. Integration service (Node.js)
+### 1a. Integration service (Spring Boot)
 
 ```powershell
 cd D:\kannan\sharingbridge\sharingbridge-integration-service
-npm install     # first time only
-npm test
+mvn test
 ```
 
 Coverage at a glance:
@@ -319,7 +318,7 @@ cd D:\kannan\sharingbridge\sharingbridge-integration-service
 $env:AI_ORCHESTRATION_BASE_URL = "http://localhost:8091"
 $env:AI_SUGGEST_VENDORS_ENABLED = "true"
 $env:AI_INSTRUCTION_PACK_ENABLED = "true"
-npm start
+mvn spring-boot:run
 # Integration service listening on 8080 (PostgreSQL)
 ```
 
@@ -1010,7 +1009,7 @@ If suggest-vendors or instruction-pack fail, verify `AI_ORCHESTRATION_BASE_URL`,
 ## 7. What "good" looks like (acceptance summary)
 
 - `python -m pytest -q` in `sharingbridge-ai-orchestration` reports `6 passed`.
-- `npm test` in `sharingbridge-integration-service` reports `# pass 152 / # fail 0` (approximate — run locally to confirm).
+- `mvn test` in `sharingbridge-integration-service` reports tests passed (run locally to confirm).
 - `npm test` in `sharingbridge-user-service` reports `# pass 49 / # fail 0` (approximate).
 - `npm test` in `sharingbridge-web-app` (Vitest) reports **34 passed** (approximate).
 - `flutter test` in `sharingbridge-mobile-app` ends with `All tests passed!` (**66 tests** approximate).

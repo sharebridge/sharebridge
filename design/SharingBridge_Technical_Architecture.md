@@ -11,7 +11,7 @@
 Product constraints: [SharingBridge_Business_Requirement.md](../requirements/SharingBridge_Business_Requirement.md) § Operating Constraints.  
 Product language: [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md). Progress: [STATUS.md](../development/STATUS.md).
 
-**MVP choices (shipped):** Flutter mobile · Vite + React web · **ASP.NET Core 8 (C#)** user-service · Node 20 Experience API (`legacy-node/` until Spring cutover) · **Spring Boot** notification-service · FastAPI for AI/photo · Postgres on Supabase · Render hosting.
+**MVP choices (shipped):** Flutter mobile · Vite + React web · **ASP.NET Core 8 (C#)** user-service · **Spring Boot** integration-service and notification-service · FastAPI for AI/photo · Postgres on Supabase · Render hosting.
 
 ---
 
@@ -33,7 +33,7 @@ flowchart TB
   end
 
   subgraph experience["Experience layer"]
-    INT["integration-service :8080\nExperience API / BFF"]
+    INT["integration-service :8080\nExperience API / BFF · Spring Boot"]
   end
 
   subgraph process["Process"]
@@ -68,7 +68,7 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 |-------|---------|------------|
 | Clients | `sharingbridge-mobile-app` | Initiator flows: presets, Help a seeker, eco kitchen, handover map |
 | Clients | `sharingbridge-web-app` | Dashboard: Initiations, Actions, Map, Connection, Help → GitHub README |
-| Experience | `sharingbridge-integration-service` | Journey APIs, order intents, demand board, geocode reverse, CORS (Node; Spring Boot later) |
+| Experience | `sharingbridge-integration-service` | Journey APIs, order intents, demand board, geocode reverse, CORS (**Spring Boot / Java 21**, Docker) |
 | System | `sharingbridge-user-service` | Google OAuth → JWT, vendor presets (`donor_presets`) — **ASP.NET Core 8**; env `DB_POOL_*` / `DB_RETRY_*` |
 | Process | `sharingbridge-ai-orchestration` | Suggest vendors + instruction-pack (Groq text, Gemini vision) |
 | Process | `sharingbridge-photo-service` | Reference photo upload (Cloudinary); **not** face-match — adopt shared `DB_*` next |
@@ -83,7 +83,7 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 |--------|-------------|-----|
 | **Mobile** | Flutter | One codebase for Android (primary) and iOS later; strong offline-friendly UI for field “Help a seeker” flows |
 | **Web** | Vite + React | Fast static dashboard on Render; no SSR needed for a signed-in ops UI |
-| **Experience API** | Node 20 + `node:http` (Spring Boot later) | Small surface for MVP; Spring Boot planned after notification beachhead |
+| **Experience API** | **Spring Boot 3 / Java 21** (Docker) | Same `/v1` contracts as the Node MVP; `DB_*` + `GIS_SCHEMA` |
 | **Auth / presets** | **ASP.NET Core 8** user-service + JWT HS256 | Identity beachhead in C#; same HTTP contracts as the prior Node MVP |
 | **AI process** | Python FastAPI + direct Groq/Gemini HTTP (no LangChain) | Live mode required; fail closed if LLM down; content-safety rules in system prompts; reject unsafe user text before calling models |
 | **Photos** | FastAPI + Cloudinary | Managed image CDN/upload without running our own object store on free tier |

@@ -57,7 +57,7 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 | Repo | Role | Status |
 |------|------|--------|
 | `sharingbridge-user-service` | Auth, presets, Postgres users (**C# / ASP.NET Core 8**) | **Shipped** (Render Docker; env-driven `DB_POOL_*` / `DB_RETRY_*`) |
-| `sharingbridge-integration-service` | Experience API / BFF | **Shipped** (Render Node via `legacy-node/`; Spring Boot `/v1` parity in repo, Docker cutover next) |
+| `sharingbridge-integration-service` | Experience API / BFF | **Shipped** (**Spring Boot / Java 21**, Docker) |
 | `sharingbridge-mobile-app` | Initiator Flutter app | **Shipped** |
 | `sharingbridge-web-app` | Coordinator + initiator (limited) dashboard | **Shipped** |
 | `sharingbridge-ai-orchestration` | suggest-vendors, instruction-pack | **Shipped** (deterministic + live) |
@@ -104,17 +104,16 @@ Detail: [database-setup-sequence.md](../configuration/database-setup-sequence.md
 
 ## Next priorities
 
-1. **integration-service Render Docker cutover** — Spring implements the Experience API in-repo; hosted service still Node (`legacy-node/`) until Runtime = Docker after smoke.
-2. **photo-service** — align Python DB client with shared `DB_*` names when next hardening.
-3. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
-4. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.
-5. **Mobile Connection panel** — in-app order-code lookup. **Shipped** (Order contacts on home + initiation detail).
-6. **Transactional email** in notification-service (Resend/SendGrid).
-7. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
-8. **UX redesign** — web hash routes shipped; mobile step wizards remain.
-9. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
-10. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
-11. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
+1. **photo-service** — align Python DB client with shared `DB_*` names when next hardening.
+2. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
+3. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.
+4. **Mobile Connection panel** — in-app order-code lookup. **Shipped** (Order contacts on home + initiation detail).
+5. **Transactional email** in notification-service (Resend/SendGrid).
+6. **Order ops + delivery proof** — [Future_Extensions.md](../design/Future_Extensions.md) Phase B.
+7. **UX redesign** — web hash routes shipped; mobile step wizards remain.
+8. **Kitchen/supplier onboarding + mentor tools** (transparency artifacts, policy acknowledgements, training materials).
+9. **Demand forecasting**: lightweight portion trend first, detailed BOM forecast later.
+10. **Recurring orders + producer supply (vision)** — [Future_Extensions.md](../design/Future_Extensions.md) Phase C–D; [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) § Producer supply & recipe BOM.
 
 Session backlog and commit log: [AGENT_SESSION.md](./AGENT_SESSION.md).
 

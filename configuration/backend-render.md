@@ -10,7 +10,7 @@ Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Te
 
 | Layer | Repo | Runtime | Called by |
 |-------|------|---------|-----------|
-| **Experience** | `sharingbridge-integration-service` | Node 20 (`legacy-node/` until Spring cutover) | mobile, web |
+| **Experience** | `sharingbridge-integration-service` | **Docker (Spring Boot / Java 21)** | mobile, web |
 | **System** | `sharingbridge-user-service` | **Docker (.NET 8 / C#)** | integration + web (Google auth) |
 | **Process** | `sharingbridge-ai-orchestration` | Docker | integration (`/internal/...`) |
 | **Process** | `sharingbridge-photo-service` | Docker | mobile (`PHOTO_SERVICE_BASE_URL`) |
@@ -25,7 +25,7 @@ Each repo has a root **`render.yaml`** blueprint. Connect via **New + → Bluepr
 
 **Database:** use **[Supabase](https://supabase.com)** (hosted Postgres) for tables and data. Render hosts **APIs only** — set **`DATABASE_URL`** on **user-service, integration-service, photo-service, and notification-service** to your Supabase connection URI. For **user-service (C# / Npgsql)** prefer the **session** pooler (`:5432`); transaction mode (`:6543`) caused read timeouts. Optional client knobs: `DB_POOL_*` / `DB_RETRY_*` (shipped on user-service; roll out to other services next) — [environment-variables.md § Database client pool & retry](./environment-variables.md#database-client-pool--retry-standard). Full steps: [database.md](./database.md). SQL order: [database-setup-sequence.md](./database-setup-sequence.md) (include M4 eco-kitchen + M5 `device_tokens` for connection push).
 
-Node services that use Postgres **require** `DATABASE_URL` at startup (no in-memory marketplace fallback). Without it, deploy fails or marketplace / device-token routes return 503. See [database.md](./database.md).
+Spring and C# APIs that use Postgres **require** `DATABASE_URL` at startup (no in-memory marketplace fallback). Without it, deploy fails or marketplace / device-token routes return 503. See [database.md](./database.md).
 
 ---
 
@@ -41,8 +41,8 @@ Node services that use Postgres **require** `DATABASE_URL` at startup (no in-mem
 
 | Field | User-service | AI orchestration | Integration | Photo service | Notification service |
 |-------|--------------|------------------|-------------|---------------|----------------------|
-| Build Command | *(empty — Docker)* | *(empty)* | `npm install --prefix legacy-node` | *(empty — Docker)* | *(empty — Docker)* |
-| Start Command | **blank** | **blank** | `npm start --prefix legacy-node` | **blank** | **blank** |
+| Build Command | *(empty — Docker)* | *(empty)* | *(empty — Docker)* | *(empty — Docker)* | *(empty — Docker)* |
+| Start Command | **blank** | **blank** | **blank** | **blank** | **blank** |
 | Pre-Deploy Command | blank | blank | blank | blank | blank |
 | Health Check Path | `/health` | `/health` | `/health` | `/health` | `/health` |
 | Auto-Deploy | **On commit** to `main` | same | same | same | same |
@@ -72,7 +72,7 @@ Secret generation: [authentication.md](./authentication.md). Postgres: [database
 
 **Render reminders:**
 
-- Do **not** set `PORT` on Node services (Render injects it).
+- Do **not** set `PORT` (Render injects it).
 - `DATABASE_URL` + `AUTH_TOKEN_SECRET` must match on user-service, integration-service, and photo-service.
 - `WEB_CORS_ORIGINS` must be the **same string** on user-service and integration-service.
 - Web static site: set `VITE_*` at **build** time; redeploy after changing them.
@@ -91,7 +91,7 @@ CORS is enforced on **user-service** and **integration-service** (not on the sta
 | Where you edit | When | Set `WEB_CORS_ORIGINS` to |
 |----------------|------|---------------------------|
 | **Local** `.env` in user-service **and** integration-service | `npm run dev` at http://localhost:5173 | `http://localhost:5173` |
-| **Render** dashboard for **both** Node services | After static site is deployed | `https://<your-static-site>.onrender.com` |
+| **Render** dashboard for **user-service and integration-service** | After static site is deployed | `https://<your-static-site>.onrender.com` |
 | **Render** (optional) | You still use local Vite but APIs stay on Render | `http://localhost:5173,https://<your-static-site>.onrender.com` |
 | **Render** (custom domain live) | Users open `https://sharingbridge.org` / `www.` | `https://sharingbridge.org,https://www.sharingbridge.org,https://<your-static-site>.onrender.com` |
 
@@ -103,7 +103,7 @@ Rules:
 4. **Do** add the Render static URL on **Render** user-service and integration-service when users open the **hosted** dashboard (Phase 4 in [e2e-deployment-sequence.md](./e2e-deployment-sequence.md)).
 5. Also add the static URL in **Google Console** → Web client → **Authorized JavaScript origins** (separate from CORS).
 
-**Comma-separated** (a semicolon separator is read as part of a single bogus origin — every browser call then fails with "Failed to fetch"), no trailing slashes, no paths. Redeploy both Node services after changing CORS on Render. Custom-domain DNS/OAuth steps: [web-client.md § Custom domain](./web-client.md#custom-domain-production-sharingbridgeorg).
+**Comma-separated** (a semicolon separator is read as part of a single bogus origin — every browser call then fails with "Failed to fetch"), no trailing slashes, no paths. Redeploy **user-service and integration-service** after changing CORS on Render. Custom-domain DNS/OAuth steps: [web-client.md § Custom domain](./web-client.md#custom-domain-production-sharingbridgeorg).
 
 ---
 
@@ -161,7 +161,7 @@ Detail: [notification-service-local.md](./notification-service-local.md) · [mob
 
 ## Local `.env` (not used on Render)
 
-**user-service (C#)** does not auto-load `.env` — export variables into the shell / IDE, or use `USER_STORE=memory` without Postgres. Node services still use `dotenv` on `npm start`.
+**user-service (C#)** and **Spring** services do not auto-load `.env` — export variables into the shell / IDE.
 
 ```powershell
 cd sharingbridge-user-service
@@ -262,9 +262,8 @@ See [mobile-client.md](./mobile-client.md) — mint JWT, then `flutter run` from
 
 | Symptom | Fix |
 |---------|-----|
-| Stuck on configure | One repo per service; Node: `npm install` + `npm start` |
-| Integration **ENOENT package.json** after Spring beachhead | Node app is under `legacy-node/`. Set **Build** `npm install --prefix legacy-node` and **Start** `npm start --prefix legacy-node` (and `NODE_VERSION=20`), then Manual Deploy. |
 | Docker **Exited status 1** | Clear **Start Command** |
+| Integration leftover `npm` after Docker cutover | **Settings → Build → Source → Edit** → Runtime **Docker**; empty Build/Start |
 | `401 missing_auth_context` | Bearer JWT from user-service |
 | `403` / invalid JWT | Match `AUTH_TOKEN_SECRET` |
 | `401 Invalid internal API key` | Match `AI_ORCHESTRATION_INTERNAL_API_KEY` |

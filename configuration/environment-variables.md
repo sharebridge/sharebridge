@@ -7,7 +7,7 @@ Tables are sorted **A–Z by variable name** to match Render’s environment UI.
 | Service | Config file | Load when |
 |---------|-------------|-----------|
 | ai-orchestration | `sharingbridge-ai-orchestration/.env` | `uvicorn` |
-| integration-service | `sharingbridge-integration-service/.env` | Node: `cd legacy-node && npm start`. Spring beachhead: export vars then `mvn spring-boot:run` |
+| integration-service | `sharingbridge-integration-service/.env` | export vars then `mvn spring-boot:run` |
 | mobile-app | `--dart-define=…` on `flutter run` | compile time (no `.env` in repo) |
 | notification-service | `sharingbridge-notification-service/.env` (export into shell) | `mvn spring-boot:run` |
 | photo-service | `sharingbridge-photo-service/.env` | `uvicorn` / pytest |
@@ -83,7 +83,7 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | user-service (C#) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
 | notification-service (Spring) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
 | photo-service (Python) | App-specific | Align naming when next DB hardening pass |
-| integration-service (Node → Spring Boot) | **Node on Render** (`legacy-node/`). **Spring in repo** reads `DB_*` (Hikari) | Smoke Spring locally, then Docker cutover |
+| integration-service (Spring) | **Done** — Hikari reads `DB_*`; Render Docker | Keep defaults unless tuning |
 
 Do **not** put passwords or full URIs in these knobs — only pool/retry behaviour. Connection identity stays in `DATABASE_URL`.
 
@@ -139,15 +139,15 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 | `CONNECTION_NOTIFY_WEBHOOK_SECRET` | *(unset)* | Shared secret sent as `X-Webhook-Secret` — must match notification-service `WEBHOOK_SECRET` |
 | `CONNECTION_NOTIFY_WEBHOOK_URL` | *(unset)* | Optional — POST JSON when eco kitchen commits (`connection_ready`); for notification-service or mailer |
 | `DATABASE_URL` | **same** as user-service | same — prefer Supabase **session** pooler (`:5432`) for this long-lived process |
-| `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Spring beachhead (Hikari); Node ignores — [shared standard](#database-client-pool--retry-standard) |
-| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Spring beachhead; Node ignores |
-| `DB_POOL_MAX` | `5` | Spring beachhead; Node ignores |
-| `DB_POOL_MIN` | `0` | Spring beachhead; Node ignores |
-| `DB_POOLING` | `true` | Spring beachhead; Node ignores |
-| `DB_RETRY_BASE_DELAY_MS` | `200` | Spring beachhead; Node ignores |
-| `DB_RETRY_MAX_ATTEMPTS` | `3` | Spring beachhead; Node ignores |
-| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | Spring beachhead; Node ignores — `5432` \| `6543` only |
-| `DB_TIMEOUT_SECONDS` | `30` | Spring beachhead; Node ignores |
+| `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query timeout — [shared standard](#database-client-pool--retry-standard) |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
+| `DB_POOL_MAX` | `5` | Max pooled connections |
+| `DB_POOL_MIN` | `0` | Min pooled connections |
+| `DB_POOLING` | `true` | Client connection pooling on/off |
+| `DB_RETRY_BASE_DELAY_MS` | `200` | Backoff base |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | `5432` \| `6543` only; other values fail startup |
+| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `GEOCODER_PROVIDER` | *(unset — implicit `nominatim`)* | **Reserved** — future switch for reverse-geocode backend; v1 always Nominatim. See [Location_Services_Vendor_Abstraction.md](../design/Location_Services_Vendor_Abstraction.md) |
 | `GIS_SCHEMA` | `extensions` | **Required.** Spatial extension schema — must match [schema-spatial-bootstrap.sql](./schema-spatial-bootstrap.sql) |
 | `INITIATOR_NEIGHBOURHOOD_RADIUS_M` | `5000` | `5000` (`near_lat` / `near_lng` filter radius in **metres**; capped at 50000 server-side) |
