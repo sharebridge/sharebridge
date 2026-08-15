@@ -44,7 +44,7 @@ Prefer `configuration/*` and `MANUAL_TESTING_GUIDE.md` over per-repo READMEs for
 
 ```text
 integration-service   cd legacy-node && npm test && npm start        → :8080
-                      (Spring beachhead: mvn test && mvn spring-boot:run — /health only so far)
+                      (Spring: mvn test && mvn spring-boot:run — full /v1 in repo; not on Render yet)
 user-service          dotnet test && dotnet run --project src/SharingBridge.UserService → :8081
 ai-orchestration      pytest -q && uvicorn…                          → :8091
 photo-service         (venv) pytest && uvicorn                       → :8092
@@ -71,7 +71,7 @@ Google sign-in and emulator URLs: [configuration/mobile-client.md](../configurat
 
 ## Next recommended tasks
 
-1. **integration-service → Spring Boot** — same `/v1` contracts; Docker on Render; adopt `DB_*` (in progress). Keep Node under `legacy-node/` until cutover.
+1. **integration-service Render Docker cutover** — Spring `/v1` is in repo; smoke then switch Runtime to Docker (empty build/start). Keep `legacy-node/` for rollback.
 2. **Render cutover (notification)** — confirm Docker runtime; clear leftover `npm` build/start if still set.
 3. **photo-service `DB_*`** — when next DB hardening pass.
 4. **UX redesign** — clearer flows / less scrolling (web + mobile); terminology cleanup in UI.
@@ -114,6 +114,6 @@ After shipping, update [STATUS.md](./STATUS.md) workstream table.
 - `docs`: DB client pool/retry standard; session vs transaction pooler guidance for Npgsql vs Node.
 - `chore` (user-service): remove dead Node `legacy-node/`; Endpoints/Services/Repositories layout; `tools/MintDevJwt`.
 - `feat` (notification-service): Spring Boot 3 / Java 21 rewrite; FCM + `DB_*` / Supabase pool port; Node MVP in `legacy-node/`; Docker/CI.
-- `chore` (integration-service): Spring Boot beachhead + preferences/AI/device-tokens/geocode slices; Node still serves Render via `legacy-node/`.
+- `chore` (integration-service): Spring Boot `/v1` parity (order intents, seeker demands, marketplace, connections); Render still Node via `legacy-node/` until Docker cutover.
 
 Older history: git log on `sharingbridge` and service repos.

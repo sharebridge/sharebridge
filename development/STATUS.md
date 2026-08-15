@@ -57,7 +57,7 @@ Direct order (vendor app)  +  Eco kitchen routes (pledge / I pay)
 | Repo | Role | Status |
 |------|------|--------|
 | `sharingbridge-user-service` | Auth, presets, Postgres users (**C# / ASP.NET Core 8**) | **Shipped** (Render Docker; env-driven `DB_POOL_*` / `DB_RETRY_*`) |
-| `sharingbridge-integration-service` | Experience API / BFF | **Shipped** (Node; Spring Boot rewrite in progress) |
+| `sharingbridge-integration-service` | Experience API / BFF | **Shipped** (Render Node via `legacy-node/`; Spring Boot `/v1` parity in repo, Docker cutover next) |
 | `sharingbridge-mobile-app` | Initiator Flutter app | **Shipped** |
 | `sharingbridge-web-app` | Coordinator + initiator (limited) dashboard | **Shipped** |
 | `sharingbridge-ai-orchestration` | suggest-vendors, instruction-pack | **Shipped** (deterministic + live) |
@@ -104,8 +104,8 @@ Detail: [database-setup-sequence.md](../configuration/database-setup-sequence.md
 
 ## Next priorities
 
-1. **Revise notification-service to Spring Boot** — **in progress locally** (same contracts + `DB_*`); push + Render Docker cutover next.
-2. **integration-service → Spring Boot** (after notification beachhead) — then apply the same DB access env standard (do **not** harden Node `pg` first).
+1. **integration-service Render Docker cutover** — Spring implements the Experience API in-repo; hosted service still Node (`legacy-node/`) until Runtime = Docker after smoke.
+2. **notification-service** — confirm Render Docker (Spring / Java 21); clear leftover `npm` if still set.
 3. **photo-service** — align Python DB client with shared `DB_*` names when next hardening.
 4. **UX redesign first** (web + mobile): route/view split, less scrolling, clearer role language.
 5. **Terminology cleanup** in visible UI: donor-oriented labels -> initiator vocabulary where appropriate.

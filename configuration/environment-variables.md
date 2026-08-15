@@ -83,7 +83,7 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 | user-service (C#) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
 | notification-service (Spring) | **Done** — reads these env vars; `GET /health` → `config.data_access` | Keep defaults unless tuning |
 | photo-service (Python) | App-specific | Align naming when next DB hardening pass |
-| integration-service (Node → Spring Boot) | **Node:** pool defaults inside `pg.Pool`. **Spring beachhead:** Hikari reads `DB_*` (routes still Node on Render) | Finish Spring `/v1` port, then Docker cutover |
+| integration-service (Node → Spring Boot) | **Node on Render** (`legacy-node/`). **Spring in repo** reads `DB_*` (Hikari) | Smoke Spring locally, then Docker cutover |
 
 Do **not** put passwords or full URIs in these knobs — only pool/retry behaviour. Connection identity stays in `DATABASE_URL`.
 
