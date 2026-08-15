@@ -81,7 +81,7 @@ Authorization: Bearer <initiator JWT>
    ```powershell
    flutter run -d <device> `
      --dart-define=HANDOVER_MAP_ENABLED=true `
-     --dart-define=API_BASE_URL=… `
+     --dart-define=INTG_SRVC_BASE_URL=… `
      …
    ```
 

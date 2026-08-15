@@ -17,7 +17,7 @@ The integration and user-service processes listen on **your PC**. The Flutter ap
 
 ### Choose one target (use the same host for all defines)
 
-| Target | `USER_SERVICE_BASE_URL` | `API_BASE_URL` | `PHOTO_SERVICE_BASE_URL` | `WEB_DASHBOARD_URL` |
+| Target | `USER_SERVICE_BASE_URL` | `INTG_SRVC_BASE_URL` | `PHOTO_SERVICE_BASE_URL` | `WEB_DASHBOARD_URL` |
 |--------|-------------------------|----------------|--------------------------|---------------------|
 | Android emulator | `http://10.0.2.2:8081` | `http://10.0.2.2:8080` | `http://10.0.2.2:8092` | `http://10.0.2.2:5173` |
 | Windows desktop | `http://localhost:8081` | `http://localhost:8080` | `http://localhost:8092` | `http://localhost:5173` |
@@ -79,7 +79,7 @@ cd D:\kannan\sharingbridge\sharingbridge-mobile-app
 flutter run -d emulator-5554 `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID from Google Cloud> `
   --dart-define=USER_SERVICE_BASE_URL=http://10.0.2.2:8081 `
-  --dart-define=API_BASE_URL=http://10.0.2.2:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://10.0.2.2:8080 `
   --dart-define=PHOTO_SERVICE_BASE_URL=http://10.0.2.2:8092 `
   --dart-define=WEB_DASHBOARD_URL=http://10.0.2.2:5173
 ```
@@ -92,7 +92,7 @@ Reference photos (optional on **Help a seeker**) upload to **photo-service** whe
 flutter run -d <device_id> `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
   --dart-define=USER_SERVICE_BASE_URL=http://192.168.1.3:8081 `
-  --dart-define=API_BASE_URL=http://192.168.1.3:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://192.168.1.3:8080 `
   --dart-define=PHOTO_SERVICE_BASE_URL=http://192.168.1.3:8092 `
   --dart-define=WEB_DASHBOARD_URL=http://192.168.1.3:5173
 ```
@@ -103,7 +103,7 @@ flutter run -d <device_id> `
 flutter run -d windows `
   --dart-define=GOOGLE_CLIENT_ID=... `
   --dart-define=USER_SERVICE_BASE_URL=http://localhost:8081 `
-  --dart-define=API_BASE_URL=http://localhost:8080
+  --dart-define=INTG_SRVC_BASE_URL=http://localhost:8080
 ```
 
 Tap **Continue with Google** on launch. Mobile mints JWT `role: initiator`; users with both `donor`/`initiator` and `coordinator` in `user_roles` may use web and mobile with the same Gmail.
@@ -118,12 +118,12 @@ $token = dotnet run --project tools/MintDevJwt -v q -- demo-user initiator
 cd ..\sharingbridge-mobile-app
 flutter run -d emulator-5554 `
   --dart-define=USER_SERVICE_BASE_URL=http://10.0.2.2:8081 `
-  --dart-define=API_BASE_URL=http://10.0.2.2:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://10.0.2.2:8080 `
   --dart-define=USER_ID=demo-user `
   --dart-define=AUTH_TOKEN=$token
 ```
 
-**Web dashboard (coordinator):** [web-client.md](./web-client.md) lists all initiators’ order intents when `VITE_API_BASE_URL` matches mobile `API_BASE_URL` (same integration host).
+**Web dashboard (coordinator):** [web-client.md](./web-client.md) lists all initiators’ order intents when `VITE_INTG_SRVC_BASE_URL` matches mobile `INTG_SRVC_BASE_URL` (same integration host).
 
 ## Release APK (`flutter build apk --release`)
 
@@ -141,7 +141,7 @@ Use a **release** build for sideloading to testers, physical devices without USB
 
 ### Hosted Render (typical)
 
-Replace placeholders with your Render URLs (must match web `VITE_API_BASE_URL` / `VITE_USER_SERVICE_BASE_URL`):
+Replace placeholders with your Render URLs (must match web `VITE_INTG_SRVC_BASE_URL` / `VITE_USER_SERVICE_BASE_URL`):
 
 ```powershell
 cd D:\kannan\sharingbridge\sharingbridge-mobile-app
@@ -149,7 +149,7 @@ flutter pub get
 flutter build apk --release `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
   --dart-define=USER_SERVICE_BASE_URL=https://<your-user-service>.onrender.com `
-  --dart-define=API_BASE_URL=https://<your-integration-service>.onrender.com `
+  --dart-define=INTG_SRVC_BASE_URL=https://<your-integration-service>.onrender.com `
   --dart-define=PHOTO_SERVICE_BASE_URL=https://<your-photo-service>.onrender.com `
   --dart-define=WEB_DASHBOARD_URL=https://<your-static-site>.onrender.com
 ```
@@ -187,7 +187,7 @@ flutter build apk --release `
   --dart-define=HANDOVER_MAP_ENABLED=true `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
   --dart-define=USER_SERVICE_BASE_URL=https://<your-user-service>.onrender.com `
-  --dart-define=API_BASE_URL=https://<your-integration-service>.onrender.com `
+  --dart-define=INTG_SRVC_BASE_URL=https://<your-integration-service>.onrender.com `
   --dart-define=PHOTO_SERVICE_BASE_URL=https://<your-photo-service>.onrender.com `
   --dart-define=WEB_DASHBOARD_URL=https://<your-static-site>.onrender.com
 ```
@@ -215,7 +215,7 @@ Same rules apply to `flutter run`. See [environment-variables.md](./environment-
 flutter build appbundle --release `
   --dart-define=GOOGLE_CLIENT_ID=... `
   --dart-define=USER_SERVICE_BASE_URL=https://... `
-  --dart-define=API_BASE_URL=https://... `
+  --dart-define=INTG_SRVC_BASE_URL=https://... `
   --dart-define=PHOTO_SERVICE_BASE_URL=https://... `
   --dart-define=WEB_DASHBOARD_URL=https://...
 ```

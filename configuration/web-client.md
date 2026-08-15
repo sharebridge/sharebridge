@@ -129,7 +129,7 @@ npm run dev
 3. Open http://localhost:5173 → **Sign in with Google** (coordinator or initiator accounts).
 4. **Refresh** after mobile initiator registrations.
 
-Coordinators see **all** initiators’ order intents on the integration host pointed to by `VITE_API_BASE_URL`. Mobile must use the **same** integration host (`API_BASE_URL`). Localhost and Render stores are separate.
+Coordinators see **all** initiators’ order intents on the integration host pointed to by `VITE_INTG_SRVC_BASE_URL`. Mobile must use the **same** integration host (`INTG_SRVC_BASE_URL`). Localhost and Render stores are separate.
 
 ## Deploy (Render static site)
 

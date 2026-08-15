@@ -4,7 +4,7 @@ Host **Web Services** for Track A. Credentials: [authentication.md](./authentica
 
 ## Experience API edge
 
-**Mobile and web call only `sharingbridge-integration-service`** (`API_BASE_URL` / `VITE_API_BASE_URL`). That service is the **Experience API** (shared BFF): it validates JWT, applies CORS, proxies presets to user-service, bridges AI to ai-orchestration, and owns order-intent data in Postgres. Internal services are not browser- or app-facing.
+**Mobile and web call only `sharingbridge-integration-service`** (`INTG_SRVC_BASE_URL` / `VITE_INTG_SRVC_BASE_URL`). That service is the **Experience API** (shared BFF): it validates JWT, applies CORS, proxies presets to user-service, bridges AI to ai-orchestration, and owns order-intent data in Postgres. Internal services are not browser- or app-facing.
 
 Layering detail: [Technical Architecture § As-built](../design/SharingBridge_Technical_Architecture.md#as-built-architecture-august-2026).
 

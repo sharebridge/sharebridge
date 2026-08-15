@@ -14,7 +14,7 @@ Tables are sorted **A–Z by variable name** to match Render’s environment UI.
 | user-service | `sharingbridge-user-service/.env` (export into shell) or IDE env | `dotnet run --project src/SharingBridge.UserService` |
 | web-app | `sharingbridge-web-app/.env` | `npm run dev` / **build** (`VITE_*` baked into `dist/`) |
 
-**Must match across services:** `DATABASE_URL` (Postgres), `AUTH_TOKEN_SECRET` (+ issuer/audience), `WEB_CORS_ORIGINS` (user-service **and** integration-service, same string), integration `API_BASE_URL` = web `VITE_API_BASE_URL` = mobile `API_BASE_URL`, web static site URL = mobile `WEB_DASHBOARD_URL`.
+**Must match across services:** `DATABASE_URL` (Postgres), `AUTH_TOKEN_SECRET` (+ issuer/audience), `WEB_CORS_ORIGINS` (user-service **and** integration-service, same string), web `VITE_INTG_SRVC_BASE_URL` = mobile `INTG_SRVC_BASE_URL` (same integration-service host), web static site URL = mobile `WEB_DASHBOARD_URL`.
 
 **Initiator feed window and radius:** set only on **integration-service** (`DONOR_NEIGHBOURHOOD_WINDOW_HOURS`, `DONOR_NEIGHBOURHOOD_RADIUS_M` in **metres**). Web and mobile read `feed.radius_m` / `neighbourhood.radius_m` from the list API. Per-row distance on the dashboard is **`distance_m`** (metres). See [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md).
 
@@ -253,9 +253,9 @@ Build-time only (`VITE_*` in `.env` before `npm run build` or `npm run dev`).
 
 | Variable | Local example | Render production |
 |----------|---------------|-------------------|
-| `VITE_API_BASE_URL` | `http://localhost:8080` | `https://<integration-host>.onrender.com` |
 | `VITE_GOOGLE_CLIENT_ID` | Web OAuth client ID | same as `GOOGLE_CLIENT_ID_WEB` |
 | `VITE_GOOGLE_MAPS_API_KEY` | optional — Maps JavaScript API | same — enables **Map** tab on dashboard |
+| `VITE_INTG_SRVC_BASE_URL` | `http://localhost:8080` | `https://<integration-host>.onrender.com` |
 | `VITE_USER_SERVICE_BASE_URL` | `http://localhost:8081` | `https://<user-host>.onrender.com` |
 
 CORS is **not** set here — set `WEB_CORS_ORIGINS` on both Node backends. See [web-client.md](./web-client.md).
@@ -268,10 +268,10 @@ No `.env` file — pass at **`flutter run`** / **`flutter build apk --release`**
 
 | Define | Local example | Production (Render) |
 |--------|---------------|---------------------|
-| `API_BASE_URL` | `http://10.0.2.2:8080` (emulator) or `http://<PC-LAN-IP>:8080` (phone) | `https://<integration-host>.onrender.com` — **must match** web `VITE_API_BASE_URL` |
 | `AUTH_TOKEN` | dev only — pre-minted JWT (`dotnet run --project tools/MintDevJwt -- <user_id> [role]` in user-service) | omit — use Google Sign-In |
 | `GOOGLE_CLIENT_ID` | Android OAuth client ID from Google Cloud | same |
 | `HANDOVER_MAP_ENABLED` | `true` / `false` | **Map screen vs coordinate form** — pass `true` when you want the cab-style picker (recommended). Gradle may auto-add `true` when `GOOGLE_MAPS_API_KEY` is in `local.properties` and you omit this flag; explicit `true` is always correct for map builds. |
+| `INTG_SRVC_BASE_URL` | `http://10.0.2.2:8080` (emulator) or `http://<PC-LAN-IP>:8080` (phone) | `https://<integration-host>.onrender.com` — **must match** web `VITE_INTG_SRVC_BASE_URL` |
 | `PHOTO_SERVICE_BASE_URL` | `http://10.0.2.2:8092` or `http://<PC-LAN-IP>:8092` | `https://<photo-host>.onrender.com` |
 | `USER_ID` | dev only — pairs with `AUTH_TOKEN` | omit |
 | `USER_SERVICE_BASE_URL` | `http://10.0.2.2:8081` or `http://<PC-LAN-IP>:8081` | `https://<user-host>.onrender.com` |
@@ -301,10 +301,10 @@ Google sign-in on web works for any account with `donor`/`initiator` and/or `coo
 | Repo | Key vars |
 |------|----------|
 | integration-service | `AUTH_TOKEN_SECRET`, `DATABASE_URL`, `GIS_SCHEMA=extensions`, `USER_SERVICE_BASE_URL=http://localhost:8081`, `WEB_CORS_ORIGINS=http://localhost:5173`, optional `CONNECTION_NOTIFY_WEBHOOK_URL=http://localhost:8093/internal/connection-ready` |
-| mobile-app | `API_BASE_URL`, `USER_SERVICE_BASE_URL`, `PHOTO_SERVICE_BASE_URL`, `GOOGLE_CLIENT_ID`, `WEB_DASHBOARD_URL=http://10.0.2.2:5173` (emulator) — all via `--dart-define` on `flutter run` |
+| mobile-app | `INTG_SRVC_BASE_URL`, `USER_SERVICE_BASE_URL`, `PHOTO_SERVICE_BASE_URL`, `GOOGLE_CLIENT_ID`, `WEB_DASHBOARD_URL=http://10.0.2.2:5173` (emulator) — all via `--dart-define` on `flutter run` |
 | notification-service | `DATABASE_URL`, `WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT_PATH` or `FIREBASE_SERVICE_ACCOUNT_JSON` — [notification-service-local.md](./notification-service-local.md) |
 | photo-service | `AUTH_TOKEN_SECRET`, `CLOUDINARY_*`, `DATABASE_URL` |
 | user-service | `AUTH_TOKEN_SECRET`, `DATABASE_URL` (session pooler `:5432`), `GOOGLE_CLIENT_ID_WEB`, `WEB_CORS_ORIGINS=http://localhost:5173` — from `.env.example`; optional `DB_POOL_*` / `DB_RETRY_*` |
-| web-app | `VITE_API_BASE_URL`, `VITE_GOOGLE_CLIENT_ID`, `VITE_USER_SERVICE_BASE_URL` → localhost ports above |
+| web-app | `VITE_INTG_SRVC_BASE_URL`, `VITE_GOOGLE_CLIENT_ID`, `VITE_USER_SERVICE_BASE_URL` → localhost ports above |
 
 Restart Node after `.env` changes. Re-export user-service env after `.env` edits. Restart `npm run dev` after web `VITE_*` changes. Rebuild mobile after any `--dart-define` change.

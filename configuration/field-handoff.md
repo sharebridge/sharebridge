@@ -46,7 +46,7 @@ Stored fields include `pack_id`, preset snapshot, reference-photo flag, and verb
 | Mobile **Order initiation history** (home hub, after Help a seeker) | **Shipped** — list + detail |
 | Web **Order initiation history** | **Shipped** (`sharingbridge-web-app`) — [web-client.md](./web-client.md) |
 
-**Coordinator web wiring:** same initiator `user_id` on sign-in as on mobile, and the same integration base URL (`VITE_API_BASE_URL` = mobile `API_BASE_URL`). Local vs Render stores are separate.
+**Coordinator web wiring:** same initiator `user_id` on sign-in as on mobile, and the same integration base URL (`VITE_INTG_SRVC_BASE_URL` = mobile `INTG_SRVC_BASE_URL`). Local vs Render stores are separate.
 
 ## Backend services
 

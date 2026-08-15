@@ -555,7 +555,7 @@ Backends always run on **your PC** (`user-service` **8081**, `integration-servic
 
 #### Pick one row — use it for every `--dart-define`
 
-| Where you run the app | `USER_SERVICE_BASE_URL` | `API_BASE_URL` | `PHOTO_SERVICE_BASE_URL` |
+| Where you run the app | `USER_SERVICE_BASE_URL` | `INTG_SRVC_BASE_URL` | `PHOTO_SERVICE_BASE_URL` |
 |----------------------|-------------------------|----------------|--------------------------|
 | **Android emulator** (Google Sign-In) | `http://10.0.2.2:8081` | `http://10.0.2.2:8080` | `http://10.0.2.2:8092` |
 | **Windows desktop** (`flutter run -d windows`) | `http://localhost:8081` | `http://localhost:8080` | `http://localhost:8092` |
@@ -598,7 +598,7 @@ Example `flutter run` on a physical device:
 flutter run -d <device_id> `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
   --dart-define=USER_SERVICE_BASE_URL=http://192.168.1.3:8081 `
-  --dart-define=API_BASE_URL=http://192.168.1.3:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://192.168.1.3:8080 `
   --dart-define=PHOTO_SERVICE_BASE_URL=http://192.168.1.3:8092
 ```
 
@@ -643,7 +643,7 @@ flutter build apk --release `
   --dart-define=HANDOVER_MAP_ENABLED=true `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
   --dart-define=USER_SERVICE_BASE_URL=https://<your-user-service>.onrender.com `
-  --dart-define=API_BASE_URL=https://<your-integration-service>.onrender.com `
+  --dart-define=INTG_SRVC_BASE_URL=https://<your-integration-service>.onrender.com `
   --dart-define=PHOTO_SERVICE_BASE_URL=https://<your-photo-service>.onrender.com `
   --dart-define=WEB_DASHBOARD_URL=https://<your-static-site>.onrender.com
 ```
@@ -657,7 +657,7 @@ Production `WEB_DASHBOARD_URL` is `https://sharingbridge.org` (custom domain) �
 **Verify:**
 
 1. APK exists at `build\app\outputs\flutter-apk\app-release.apk`.
-2. Install (`adb install -r …` or copy to phone) → **Continue with Google** → walk **§3f** / **§3h** against hosted integration (`API_BASE_URL` must match web `VITE_API_BASE_URL`).
+2. Install (`adb install -r …` or copy to phone) → **Continue with Google** → walk **§3f** / **§3h** against hosted integration (`INTG_SRVC_BASE_URL` must match web `VITE_INTG_SRVC_BASE_URL`).
 3. Coordinator web **Refresh** (**§4c**) shows the intent from the same integration host.
 
 **Play Store:** `flutter build appbundle --release` with the same `--dart-define` flags — see mobile-client § Release APK.
@@ -683,7 +683,7 @@ cd D:\kannan\sharingbridge\sharingbridge-mobile-app
 flutter run -d emulator-5554 `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
   --dart-define=USER_SERVICE_BASE_URL=http://10.0.2.2:8081 `
-  --dart-define=API_BASE_URL=http://10.0.2.2:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://10.0.2.2:8080 `
   --dart-define=PHOTO_SERVICE_BASE_URL=http://10.0.2.2:8092
 ```
 
@@ -705,7 +705,7 @@ $mobileToken = dotnet run --project tools/MintDevJwt -v q -- alice initiator
 cd D:\kannan\sharingbridge\sharingbridge-mobile-app
 flutter run -d emulator-5554 `
   --dart-define=USER_SERVICE_BASE_URL=http://10.0.2.2:8081 `
-  --dart-define=API_BASE_URL=http://10.0.2.2:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://10.0.2.2:8080 `
   --dart-define=PHOTO_SERVICE_BASE_URL=http://10.0.2.2:8092 `
   --dart-define=USER_ID=alice `
   --dart-define=AUTH_TOKEN=$mobileToken
@@ -715,7 +715,7 @@ flutter run -d emulator-5554 `
 
 ```powershell
 flutter run -d windows `
-  --dart-define=API_BASE_URL=http://localhost:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://localhost:8080 `
   --dart-define=USER_ID=alice `
   --dart-define=AUTH_TOKEN=$mobileToken
 ```
@@ -794,7 +794,7 @@ Use [configuration/mobile-client.md](../configuration/mobile-client.md). Public 
 cd D:\kannan\sharingbridge\sharingbridge-mobile-app
 flutter run -d emulator-5554 `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
-  --dart-define=API_BASE_URL=https://sharingbridge-integration-service.onrender.com `
+  --dart-define=INTG_SRVC_BASE_URL=https://sharingbridge-integration-service.onrender.com `
   --dart-define=USER_SERVICE_BASE_URL=https://sharingbridge-user-service.onrender.com
 ```
 
@@ -817,7 +817,7 @@ Walk through **§3f**; step 4 must show **Order intent registered** (or **update
 1. On handover step, **with key:** map + centre pin + read-only **Address** + editable **Pickup note** + read-only **Postal area**.
 2. Pan map or **Refresh GPS** — address/postal lines update after debounced geocode.
 3. **Without key** (empty `local.properties` line): coordinate form fallback (`HandoverLocationConfirmCard`) — flow still completes.
-4. Hosted Render: use `https://…integration…` as `API_BASE_URL`; redeploy integration if address line stays empty (`502` → check `NOMINATIM_USER_AGENT` on Render).
+4. Hosted Render: use `https://…integration…` as `INTG_SRVC_BASE_URL`; redeploy integration if address line stays empty (`502` → check `NOMINATIM_USER_AGENT` on Render).
 
 **Eco kitchen:** after manual lat/lng edit on form fallback, menu clears until **Reload menu for updated coordinates**; **Refresh GPS** auto-reloads menu ([Handover_Location_Map_Picker.md](../design/Handover_Location_Map_Picker.md)).
 
@@ -829,7 +829,7 @@ Walk through **§3f**; step 4 must show **Order intent registered** (or **update
 4. Tap a row → detail shows pack id, status, notes, preset snapshot, and whether a reference photo was attached.
 5. Tap **Home** in the app bar → returns to the hub (Vendor presets / Help a seeker / Order initiation history). **Back** only pops one screen.
 
-Empty state is normal before any intent is registered. Requires the same `AUTH_TOKEN` / `API_BASE_URL` as other flows. Coordinator view of the same data: **§4**.
+Empty state is normal before any intent is registered. Requires the same `AUTH_TOKEN` / `INTG_SRVC_BASE_URL` as other flows. Coordinator view of the same data: **§4**.
 
 ## 4. End-to-end with the web dashboard
 
@@ -848,7 +848,7 @@ Complete [configuration/e2e-deployment-sequence.md](../configuration/e2e-deploym
 2. **integration-service** — `WEB_CORS_ORIGINS=http://localhost:5173`, same `AUTH_TOKEN_SECRET` as user-service. Restart after edits.
 3. **sharingbridge-web-app** — `.env`:
    - `VITE_GOOGLE_CLIENT_ID` = Web Client ID
-   - `VITE_API_BASE_URL=http://localhost:8080`
+   - `VITE_INTG_SRVC_BASE_URL=http://localhost:8080`
    - `VITE_USER_SERVICE_BASE_URL=http://localhost:8081`
 4. Optional: register at least one order intent via mobile **§3f** (**§3-auth** Google initiator or **§3-dev**) so the coordinator dashboard is not empty on first **Refresh**.
 
@@ -964,7 +964,7 @@ Setup gaps: [database-setup-sequence.md](../configuration/database-setup-sequenc
 ### 4e. Empty list / mismatch
 
 - Coordinators see intents for **every** initiator on **that** integration API host (unless a scope filter from **§4c-c** is applied). An empty list usually means no initiator has registered an intent on **this** host yet (localhost vs Render are separate stores).
-- `VITE_API_BASE_URL` must match mobile `API_BASE_URL` (both localhost or both Render URLs).
+- `VITE_INTG_SRVC_BASE_URL` must match mobile `INTG_SRVC_BASE_URL` (both localhost or both Render URLs).
 - `403 wrong_client_role` on web: account has no `donor`/`initiator` or `coordinator` in `user_roles` (`no_app_role`). Initiator-only accounts should sign in successfully and see the **limited** dashboard.
 - `403 wrong_client_role` on mobile: account missing `initiator` in `user_roles` (rare after sign-in; every user gets `initiator` ensured).
 - **Connection refused** on emulator sign-in or API: you used `localhost` in dart-defines — switch both URLs to `http://10.0.2.2:8081` and `http://10.0.2.2:8080` (**§3-host**).

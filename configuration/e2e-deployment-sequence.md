@@ -48,7 +48,7 @@ flowchart TD
 | Deploy Render static site | Repo on Render; hosted API URLs recommended |
 | Add Render URL to Google **Authorized JavaScript origins** | **Static site URL** from first deploy |
 | Hosted Google sign-in works | `VITE_GOOGLE_CLIENT_ID` on static site **and** Google origin **and** `WEB_CORS_ORIGINS` on both backends **and** `coordinator` in Postgres `user_roles` |
-| Initiator intents visible on hosted dashboard | Mobile (or API) uses the **same** integration host as `VITE_API_BASE_URL` |
+| Initiator intents visible on hosted dashboard | Mobile (or API) uses the **same** integration host as `VITE_INTG_SRVC_BASE_URL` |
 
 **Common misconception:** you need the Render static URL before creating the Google client — **no**. Create the Web client early with `http://localhost:5173`; add the Render origin after the first static deploy.
 
@@ -354,7 +354,7 @@ If you added or changed `VITE_*` after first deploy, trigger a **manual deploy**
 
 1. Open `https://<your-static-site>.onrender.com`.
 2. **Sign in with Google** with a Gmail that has `coordinator` in `user_roles` (Supabase/Postgres seed).
-3. **Refresh** — order initiations appear when initiators used the **same** integration host (`VITE_API_BASE_URL` = mobile `API_BASE_URL`).
+3. **Refresh** — order initiations appear when initiators used the **same** integration host (`VITE_INTG_SRVC_BASE_URL` = mobile `INTG_SRVC_BASE_URL`).
 
 Manual test steps: [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) **§4**.
 
@@ -377,7 +377,7 @@ Hosted mobile uses the same integration URL as the web dashboard:
 
 ```text
 USER_SERVICE_BASE_URL=https://<your-user-service>.onrender.com
-API_BASE_URL=https://<your-integration-service>.onrender.com
+INTG_SRVC_BASE_URL=https://<your-integration-service>.onrender.com
 PHOTO_SERVICE_BASE_URL=https://<your-photo-service>.onrender.com
 GOOGLE_CLIENT_ID=<Android client id>
 WEB_DASHBOARD_URL=https://<your-static-site>.onrender.com
@@ -391,7 +391,7 @@ flutter pub get
 flutter build apk --release `
   --dart-define=GOOGLE_CLIENT_ID=<Android OAuth client ID> `
   --dart-define=USER_SERVICE_BASE_URL=https://<your-user-service>.onrender.com `
-  --dart-define=API_BASE_URL=https://<your-integration-service>.onrender.com `
+  --dart-define=INTG_SRVC_BASE_URL=https://<your-integration-service>.onrender.com `
   --dart-define=PHOTO_SERVICE_BASE_URL=https://<your-photo-service>.onrender.com `
   --dart-define=WEB_DASHBOARD_URL=https://<your-static-site>.onrender.com
 ```
@@ -412,7 +412,7 @@ Rebuild APK with `google-services.json` + Firebase SHA fingerprints — [mobile-
 | CORS error in browser console | 4 | `WEB_CORS_ORIGINS` on **both** backends includes static URL |
 | Sign-in works locally, not on Render | 3–4 | `VITE_GOOGLE_CLIENT_ID` set; rebuild static site; origins + CORS |
 | `403 wrong_client_role` on web | 1 / 2 | Grant `coordinator` in `user_roles` ([coordinator-seed.sql](./coordinator-seed.sql)); web client only for coordinators |
-| Empty dashboard on Render | 5 | Initiator mobile must post to **same** `VITE_API_BASE_URL` host |
+| Empty dashboard on Render | 5 | Initiator mobile must post to **same** `VITE_INTG_SRVC_BASE_URL` host |
 | `401` / invalid token | 2 | `AUTH_TOKEN_SECRET` must match on user-service and integration-service |
 
 More: [google-auth-setup.md](./google-auth-setup.md) troubleshooting section.

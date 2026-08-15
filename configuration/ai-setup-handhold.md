@@ -139,7 +139,7 @@ Restart integration-service after changes.
 Point at integration + photo service:
 
 ```powershell
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080 `
+flutter run --dart-define=INTG_SRVC_BASE_URL=http://10.0.2.2:8080 `
   --dart-define=PHOTO_SERVICE_BASE_URL=http://10.0.2.2:8092
 ```
 

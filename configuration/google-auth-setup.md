@@ -206,7 +206,7 @@ copy env.example .env
 ```
 
 ```env
-VITE_API_BASE_URL=http://localhost:8080
+VITE_INTG_SRVC_BASE_URL=http://localhost:8080
 VITE_USER_SERVICE_BASE_URL=http://localhost:8081
 VITE_GOOGLE_CLIENT_ID=<same as GOOGLE_CLIENT_ID_WEB>
 ```
@@ -255,7 +255,7 @@ flutter pub get
 flutter run -d emulator-5554 `
   --dart-define=GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID_ANDROID> `
   --dart-define=USER_SERVICE_BASE_URL=http://10.0.2.2:8081 `
-  --dart-define=API_BASE_URL=http://10.0.2.2:8080
+  --dart-define=INTG_SRVC_BASE_URL=http://10.0.2.2:8080
 ```
 
 **Windows desktop:** same URLs with `localhost` (Google Sign-In not supported on Windows — use emulator or dev token).
@@ -290,7 +290,7 @@ Yes — deploy the web app on [Render Static Sites](https://render.com/docs/stat
 
    | Key | Example |
    |-----|---------|
-   | `VITE_API_BASE_URL` | `https://sharingbridge-integration-service.onrender.com` |
+   | `VITE_INTG_SRVC_BASE_URL` | `https://sharingbridge-integration-service.onrender.com` |
    | `VITE_USER_SERVICE_BASE_URL` | `https://sharingbridge-user-service.onrender.com` |
    | `VITE_GOOGLE_CLIENT_ID` | Same **Web** OAuth client ID as local (`….apps.googleusercontent.com`) |
 
@@ -348,7 +348,7 @@ Grant **`coordinator`** in **`user_roles`** on your Postgres instance (Supabase 
 
 1. Open `https://<your-static-site>.onrender.com`.
 2. **Sign in with Google** (Gmail with `coordinator` in `user_roles`).
-3. Mobile app must use **hosted** integration URL (`API_BASE_URL` = same as `VITE_API_BASE_URL`) for intents to appear on the hosted dashboard.
+3. Mobile app must use **hosted** integration URL (`INTG_SRVC_BASE_URL` = same as `VITE_INTG_SRVC_BASE_URL`) for intents to appear on the hosted dashboard.
 
 ### Order of operations (recommended)
 

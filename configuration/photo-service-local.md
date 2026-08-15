@@ -27,12 +27,12 @@ Health: `http://localhost:8092/health`
 ```powershell
 flutter run -d <device> `
   --dart-define=PHOTO_SERVICE_BASE_URL=http://10.0.2.2:8092 `
-  --dart-define=API_BASE_URL=http://10.0.2.2:8080 `
+  --dart-define=INTG_SRVC_BASE_URL=http://10.0.2.2:8080 `
   --dart-define=USER_SERVICE_BASE_URL=http://10.0.2.2:8081 `
   --dart-define=GOOGLE_CLIENT_ID=...
 ```
 
-**Physical device:** use your PC’s Wi‑Fi IPv4 for **all** services (`USER_SERVICE`, `API`, `PHOTO`) — same Wi‑Fi as the PC. See [mobile-client.md](./mobile-client.md) § Local networking and [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) §3-host.
+**Physical device:** use your PC’s Wi‑Fi IPv4 for **all** services (`USER_SERVICE`, `INTG_SRVC`, `PHOTO`) — same Wi‑Fi as the PC. See [mobile-client.md](./mobile-client.md) § Local networking and [MANUAL_TESTING_GUIDE.md](../testing/MANUAL_TESTING_GUIDE.md) §3-host.
 
 ## API
 
