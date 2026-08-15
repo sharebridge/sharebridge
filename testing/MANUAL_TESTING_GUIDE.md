@@ -237,17 +237,17 @@ Expected output footer:
 # fail 0
 ```
 
-### 1f. Notification service (Node.js)
+### 1f. Notification service (Spring Boot)
 
 Requires **M5** and Firebase. Part of the eco kitchen stack after integration-service.
 
 ```powershell
 cd D:\kannan\sharingbridge\sharingbridge-notification-service
-copy env.example .env
+copy .env.example .env
 # DATABASE_URL (same as integration); WEBHOOK_SECRET; FIREBASE_SERVICE_ACCOUNT_PATH or JSON
-npm install
-npm test
-npm start
+# Export vars into the shell, then:
+mvn test
+mvn spring-boot:run
 # listens on http://localhost:8093
 ```
 

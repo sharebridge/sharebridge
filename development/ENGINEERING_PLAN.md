@@ -59,7 +59,7 @@ Develop and test all SharingBridge components using free-tier platforms with nea
 
 **How this relates to code today:** The table below describes the **target free-tier stack**. As-built status: [STATUS.md](./STATUS.md). SQL order: [database-setup-sequence.md](../configuration/database-setup-sequence.md).
 
-**Language beachheads (in progress):** user-service is **ASP.NET Core 8**; notification-service → **Spring Boot** next; integration later. Shared Postgres client knobs (`DB_POOL_*` / `DB_RETRY_*`) shipped on user-service — apply the same names when rewriting or hardening other services ([env standard](../configuration/environment-variables.md#database-client-pool--retry-standard)).
+**Language beachheads:** user-service is **ASP.NET Core 8**; notification-service is **Spring Boot**; integration-service Spring `/v1` is in-repo (Render still Node until Docker cutover). Shared Postgres client knobs (`DB_POOL_*` / `DB_RETRY_*`) — apply the same names when rewriting or hardening other services ([env standard](../configuration/environment-variables.md#database-client-pool--retry-standard)).
 
 ---
 

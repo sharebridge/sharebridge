@@ -11,7 +11,7 @@
 Product constraints: [SharingBridge_Business_Requirement.md](../requirements/SharingBridge_Business_Requirement.md) § Operating Constraints.  
 Product language: [PRODUCT_MODEL.md](../development/PRODUCT_MODEL.md). Progress: [STATUS.md](../development/STATUS.md).
 
-**MVP choices (shipped):** Flutter mobile · Vite + React web · **ASP.NET Core 8 (C#)** user-service · Node 20 Experience API + notification-service (Spring Boot planned) · FastAPI for AI/photo · Postgres on Supabase · Render hosting.
+**MVP choices (shipped):** Flutter mobile · Vite + React web · **ASP.NET Core 8 (C#)** user-service · Node 20 Experience API (`legacy-node/` until Spring cutover) · **Spring Boot** notification-service · FastAPI for AI/photo · Postgres on Supabase · Render hosting.
 
 ---
 
@@ -39,7 +39,7 @@ flowchart TB
   subgraph process["Process"]
     AI["ai-orchestration :8091\nFastAPI · Groq / Gemini"]
     PHO["photo-service :8092\nFastAPI · Cloudinary"]
-    NOT["notification-service :8093\nFCM · Spring Boot planned"]
+    NOT["notification-service :8093\nFCM · Spring Boot"]
   end
 
   subgraph system["System of record"]
@@ -72,7 +72,7 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 | System | `sharingbridge-user-service` | Google OAuth → JWT, vendor presets (`donor_presets`) — **ASP.NET Core 8**; env `DB_POOL_*` / `DB_RETRY_*` |
 | Process | `sharingbridge-ai-orchestration` | Suggest vendors + instruction-pack (Groq text, Gemini vision) |
 | Process | `sharingbridge-photo-service` | Reference photo upload (Cloudinary); **not** face-match — adopt shared `DB_*` next |
-| Process | `sharingbridge-notification-service` | FCM push on kitchen commit (Node today → **Spring Boot**; adopt `DB_*`) |
+| Process | `sharingbridge-notification-service` | FCM push on kitchen commit (**Spring Boot / Java 21**, Docker; `DB_*`) |
 | Data | Supabase Postgres + PostGIS | Users, intents, marketplace tables, device tokens; prefer **session** pooler (`:5432`) for long-lived APIs |
 
 **Not built for MVP:** `api-gateway`, `order-service`, `infra`. **Archived:** `location-safety`.
@@ -87,7 +87,7 @@ Clients use **integration-service** for journeys. Web also calls **user-service*
 | **Auth / presets** | **ASP.NET Core 8** user-service + JWT HS256 | Identity beachhead in C#; same HTTP contracts as the prior Node MVP |
 | **AI process** | Python FastAPI + direct Groq/Gemini HTTP (no LangChain) | Live mode required; fail closed if LLM down; content-safety rules in system prompts; reject unsafe user text before calling models |
 | **Photos** | FastAPI + Cloudinary | Managed image CDN/upload without running our own object store on free tier |
-| **Push** | FCM via notification-service (Node → Spring Boot) | Standard Android push; Spring rewrite keeps `/internal/connection-ready` |
+| **Push** | FCM via notification-service (Spring Boot) | `/internal/connection-ready` + `X-Webhook-Secret` |
 | **Database** | Postgres on Supabase (+ PostGIS); shared `DB_POOL_*` / `DB_RETRY_*` | Relational + geo; session pooler for long-lived APIs; client knobs shipped on user-service first — [env standard](../configuration/environment-variables.md#database-client-pool--retry-standard) |
 | **Hosting** | Render (APIs + static site) + custom domain `sharingbridge.org` | Zero/low-cost deploy, Git-linked deploys; GoDaddy DNS for the public site |
 | **Maps (tiles)** | Google Maps SDK on Android when keyed | Familiar cab-style picker; key stays in `local.properties`, not Dart |

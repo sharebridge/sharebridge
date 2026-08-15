@@ -163,7 +163,7 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 
 ## `sharingbridge-notification-service`
 
-**Runtime:** Spring Boot 3 / Java 21 (Docker on Render). Node MVP under `legacy-node/`.  
+**Runtime:** Spring Boot 3 / Java 21 (Docker on Render).  
 **Template:** `.env.example` → `.env`, then export into the shell before `mvn spring-boot:run`.
 
 | Variable | Local example | Render production |

@@ -247,7 +247,7 @@ Deploy in order — [backend-render.md](./backend-render.md). Each repo’s **`r
 2. **ai-orchestration** (Docker) — if integration uses AI paths.
 3. **integration-service** (Web Service, Node 20).
 4. **photo-service** (Docker) — reference photo upload from mobile.
-5. **notification-service** (Web Service, Node 20) — FCM on eco kitchen commit; [notification-service-local.md](./notification-service-local.md).
+5. **notification-service** (Web Service, **Docker / Spring Boot**) — FCM on eco kitchen commit; [notification-service-local.md](./notification-service-local.md).
 6. **integration-service** (redeploy) — set `CONNECTION_NOTIFY_WEBHOOK_URL` + `CONNECTION_NOTIFY_WEBHOOK_SECRET` after step 5.
 
 ### Render backend env

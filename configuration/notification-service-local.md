@@ -1,6 +1,6 @@
 # Notification service — local and Render
 
-Repository: `sharingbridge-notification-service` (Node 20).
+Repository: `sharingbridge-notification-service` (**Spring Boot 3 / Java 21**, Docker on Render).
 
 **Purpose:** When an eco kitchen **commits**, integration-service POSTs here; this service looks up FCM tokens in `device_tokens` and sends **connection-ready** push to mobile.
 
@@ -41,13 +41,13 @@ Deploy on Render: [backend-render.md](./backend-render.md) § Notification servi
 
 ```powershell
 cd sharingbridge-notification-service
-copy env.example .env
+copy .env.example .env
+# Export vars into the shell (Spring does not load .env automatically):
 # DATABASE_URL — same as integration-service
 # WEBHOOK_SECRET — same value as CONNECTION_NOTIFY_WEBHOOK_SECRET on integration
 # FIREBASE_SERVICE_ACCOUNT_PATH=.\firebase-adminsdk.json
-npm install
-npm test
-npm start
+mvn test
+mvn spring-boot:run
 ```
 
 Health: `http://localhost:8093/health`

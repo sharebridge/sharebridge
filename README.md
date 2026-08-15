@@ -21,7 +21,7 @@ Vite/React web ──┘           │
                                ├──► user-service (C# / ASP.NET) → Postgres (auth, presets; DB_POOL_* / DB_RETRY_*)
                                ├──► ai-orchestration → Groq / Gemini
                                ├──► photo-service → Cloudinary (+ shared DB_* next)
-                               ├──► notification-service → FCM (Node → Spring Boot; DB_* in rewrite)
+                               ├──► notification-service → FCM (Spring Boot / Java 21)
                                └──► Postgres / PostGIS (order intents, marketplace; prefer session pooler)
                                          ↓
                               Vendor deep links (payment off-platform)
@@ -33,7 +33,7 @@ Vite/React web ──┘           │
 | Web | Vite + React | Static dashboard on Render |
 | Experience API | Node 20 HTTP → Spring Boot later | Small BFF; fast free-tier deploys |
 | Auth | **C#** user-service + Google JWT | Identity separate from journeys; ASP.NET Core on Render Docker; env `DB_POOL_*` / `DB_RETRY_*` |
-| Notifications | Node today → **Spring Boot** next | Keep FCM webhook; same DB access env standard when rewritten |
+| Notifications | **Spring Boot / Java 21** (Docker) | FCM webhook `/internal/connection-ready`; `DB_*` knobs |
 | AI | FastAPI + Groq/Gemini | Live enrichment required; fail closed if LLM down; prompts include content-safety rules |
 | Photos | Cloudinary | Managed uploads without our own object store |
 | Data | Supabase Postgres + PostGIS | Geo neighbourhood feeds; shared `DB_*` client knobs |
@@ -52,7 +52,7 @@ Vite/React web ──┘           │
 | `sharingbridge-user-service` | Auth + vendor presets (**ASP.NET Core / C#**; `DB_POOL_*` / `DB_RETRY_*`) |
 | `sharingbridge-ai-orchestration` | LLM pipelines |
 | `sharingbridge-photo-service` | Photo upload |
-| `sharingbridge-notification-service` | FCM on kitchen commit (**Node today**; planned rewrite to **Spring Boot**) |
+| `sharingbridge-notification-service` | FCM on kitchen commit (**Spring Boot / Java 21**) |
 
 **Not started:** `api-gateway`, `order-service`, `infra`. **Archived:** `location-safety`.
 
