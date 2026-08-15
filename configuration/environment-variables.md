@@ -66,15 +66,15 @@ Set the **same value** on all five Render Web Services if you want consistent ve
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `DB_POOLING` | `true` | Client-side connection pooling on/off |
-| `DB_POOL_MIN` | `0` | Min pooled connections |
-| `DB_POOL_MAX` | `5` | Max pooled connections (keep modest on free tier) |
-| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
-| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query / command timeout |
-| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | (.NET) On `*.pooler.supabase.com`: `5432` \| `6543` only; other values fail startup |
-| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries (timeouts / stream errors) |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
+| `DB_POOL_MAX` | `5` | Max pooled connections (keep modest on free tier) |
+| `DB_POOL_MIN` | `0` | Min pooled connections |
+| `DB_POOLING` | `true` | Client-side connection pooling on/off |
 | `DB_RETRY_BASE_DELAY_MS` | `200` | Backoff base (`delay ≈ base × attempt²`) |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries (timeouts / stream errors) |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | (.NET) On `*.pooler.supabase.com`: `5432` \| `6543` only; other values fail startup |
+| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 
 **Rollout:**
 
@@ -101,15 +101,15 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 | `AUTH_TOKEN_SECRET` | shared secret | generated, same on integration + photo |
 | `AUTH_TOKEN_TTL_SECONDS` | `3600` | `3600` |
 | `DATABASE_URL` | `postgresql://…@localhost:5432/sharingbridge` | Supabase URI (session pooler `:5432` preferred for .NET) |
-| `DB_POOLING` | `true` | Client connection pooling on/off |
-| `DB_POOL_MIN` | `0` | Min pooled connections |
-| `DB_POOL_MAX` | `5` | Max pooled connections (keep modest on free tier) |
-| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
-| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query timeout |
-| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | On `*.pooler.supabase.com`, force pooler port: **`5432`** (session, default when unset) or **`6543`** (transaction). Any other value fails startup. |
-| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries on Google sign-in path |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Drop idle pooled connections after N seconds |
+| `DB_POOL_MAX` | `5` | Max pooled connections (keep modest on free tier) |
+| `DB_POOL_MIN` | `0` | Min pooled connections |
+| `DB_POOLING` | `true` | Client connection pooling on/off |
 | `DB_RETRY_BASE_DELAY_MS` | `200` | Base backoff for retries (`delay = base * attempt²`) |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries on Google sign-in path |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | On `*.pooler.supabase.com`, force pooler port: **`5432`** (session, default when unset) or **`6543`** (transaction). Any other value fails startup. |
+| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `GOOGLE_CLIENT_ID_ANDROID` | Android OAuth client ID | when mobile uses Google |
 | `GOOGLE_CLIENT_ID_WEB` | Web OAuth client ID | same as `VITE_GOOGLE_CLIENT_ID` |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
@@ -139,14 +139,22 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 | `CONNECTION_NOTIFY_WEBHOOK_SECRET` | *(unset)* | Shared secret sent as `X-Webhook-Secret` — must match notification-service `WEBHOOK_SECRET` |
 | `CONNECTION_NOTIFY_WEBHOOK_URL` | *(unset)* | Optional — POST JSON when eco kitchen commits (`connection_ready`); for notification-service or mailer |
 | `DATABASE_URL` | **same** as user-service | same — prefer Supabase **session** pooler (`:5432`) for this long-lived process |
-| `DB_POOL_*` / `DB_RETRY_*` / `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | Spring beachhead reads them (Hikari); Node ignores | Same [shared standard](#database-client-pool--retry-standard) as user-service / notification |
+| `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Spring beachhead (Hikari); Node ignores — [shared standard](#database-client-pool--retry-standard) |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Spring beachhead; Node ignores |
+| `DB_POOL_MAX` | `5` | Spring beachhead; Node ignores |
+| `DB_POOL_MIN` | `0` | Spring beachhead; Node ignores |
+| `DB_POOLING` | `true` | Spring beachhead; Node ignores |
+| `DB_RETRY_BASE_DELAY_MS` | `200` | Spring beachhead; Node ignores |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Spring beachhead; Node ignores |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | Spring beachhead; Node ignores — `5432` \| `6543` only |
+| `DB_TIMEOUT_SECONDS` | `30` | Spring beachhead; Node ignores |
+| `GEOCODER_PROVIDER` | *(unset — implicit `nominatim`)* | **Reserved** — future switch for reverse-geocode backend; v1 always Nominatim. See [Location_Services_Vendor_Abstraction.md](../design/Location_Services_Vendor_Abstraction.md) |
+| `GIS_SCHEMA` | `extensions` | **Required.** Spatial extension schema — must match [schema-spatial-bootstrap.sql](./schema-spatial-bootstrap.sql) |
 | `INITIATOR_NEIGHBOURHOOD_RADIUS_M` | `5000` | `5000` (`near_lat` / `near_lng` filter radius in **metres**; capped at 50000 server-side) |
 | `INITIATOR_NEIGHBOURHOOD_WINDOW_HOURS` | `2` | `2` (initiator list `since`, photo redaction; 1–72) |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
-| `GEOCODER_PROVIDER` | *(unset — implicit `nominatim`)* | **Reserved** — future switch for reverse-geocode backend; v1 always Nominatim. See [Location_Services_Vendor_Abstraction.md](../design/Location_Services_Vendor_Abstraction.md) |
 | `NOMINATIM_USER_AGENT` | `SharingBridge-Integration-Service/1.0` | same — GPS → postal `locality_key` (`IN:TN:600115`) via Nominatim reverse geocode |
 | `ORDER_INTENT_LIST_MAX_ROWS` | `100` | `100` (max rows per dashboard list) |
-| `GIS_SCHEMA` | `extensions` | **Required.** Spatial extension schema — must match [schema-spatial-bootstrap.sql](./schema-spatial-bootstrap.sql) |
 | `PORT` | `8080` | injected by Render — do not set |
 | `USER_SERVICE_BASE_URL` | `http://localhost:8081` (required) | `https://<user-host>.onrender.com` — initiator vendor presets in Postgres |
 | `WEB_CORS_ORIGINS` | **same string** as user-service | same |
@@ -161,15 +169,15 @@ Do **not** put passwords or full URIs in these knobs — only pool/retry behavio
 | Variable | Local example | Render production |
 |----------|---------------|-------------------|
 | `DATABASE_URL` | **same** as integration-service | same — reads `device_tokens` |
-| `DB_POOLING` | `true` | Client connection pooling on/off |
-| `DB_POOL_MIN` | `0` | Min pooled connections |
-| `DB_POOL_MAX` | `5` | Max pooled connections |
-| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Idle drop |
-| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `DB_COMMAND_TIMEOUT_SECONDS` | `30` | Query timeout |
-| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | `5432` \| `6543` only; other values fail startup |
-| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | Idle drop |
+| `DB_POOL_MAX` | `5` | Max pooled connections |
+| `DB_POOL_MIN` | `0` | Min pooled connections |
+| `DB_POOLING` | `true` | Client connection pooling on/off |
 | `DB_RETRY_BASE_DELAY_MS` | `200` | Backoff base |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | Transient DB retries |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | `5432` \| `6543` only; other values fail startup |
+| `DB_TIMEOUT_SECONDS` | `30` | Connect timeout |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | *(optional locally if using PATH)* | **Preferred on Render** — paste full Admin SDK JSON from Firebase Console (see below) |
 | `FIREBASE_SERVICE_ACCOUNT_PATH` | `.\firebase-adminsdk.json` | **Do not use on Render** — local `.env` only; path to downloaded Admin SDK key file |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
@@ -201,7 +209,15 @@ Webhook route: `POST /internal/connection-ready` — set integration `CONNECTION
 | `CLOUDINARY_CLOUD_NAME` | | required |
 | `CLOUDINARY_URL` | optional alternative to the three keys above | `cloudinary://…` |
 | `DATABASE_URL` | same Postgres | same — prefer session pooler (`:5432`) |
-| `DB_POOL_*` / `DB_RETRY_*` | *(not wired yet)* | **Planned** — align Python DB client with the [shared standard](#database-client-pool--retry-standard) |
+| `DB_COMMAND_TIMEOUT_SECONDS` | `30` | **Planned** — [shared standard](#database-client-pool--retry-standard) |
+| `DB_CONNECTION_IDLE_LIFETIME_SECONDS` | `60` | **Planned** |
+| `DB_POOL_MAX` | `5` | **Planned** |
+| `DB_POOL_MIN` | `0` | **Planned** |
+| `DB_POOLING` | `true` | **Planned** |
+| `DB_RETRY_BASE_DELAY_MS` | `200` | **Planned** |
+| `DB_RETRY_MAX_ATTEMPTS` | `3` | **Planned** |
+| `DB_SUPABASE_POOL_6543_4TR_5432_4SESN` | `5432` | **Planned** |
+| `DB_TIMEOUT_SECONDS` | `30` | **Planned** |
 | `LOG_LEVEL` | `warn` | `error`, `warn`, `info`, or `debug` — see [LOG_LEVEL](#log_level-all-backend-apis) |
 
 See [photo-service-local.md](./photo-service-local.md).
