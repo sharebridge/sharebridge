@@ -263,6 +263,7 @@ See [mobile-client.md](./mobile-client.md) — mint JWT, then `flutter run` from
 | Symptom | Fix |
 |---------|-----|
 | Stuck on configure | One repo per service; Node: `npm install` + `npm start` |
+| Integration **ENOENT package.json** after Spring beachhead | Dashboard still runs root `npm install`. Root shim now delegates to `legacy-node/`. Confirm **Node 20** (`NODE_VERSION` or `.nvmrc`), then **Manual Deploy**. Optional: set Build/Start to `npm install --prefix legacy-node` / `npm start --prefix legacy-node`. |
 | Docker **Exited status 1** | Clear **Start Command** |
 | `401 missing_auth_context` | Bearer JWT from user-service |
 | `403` / invalid JWT | Match `AUTH_TOKEN_SECRET` |
